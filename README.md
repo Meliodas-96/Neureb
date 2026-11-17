@@ -30,12 +30,9 @@ NEUREB es un visor web interactivo de un modelo 3D del cerebro, diseñado como r
 
 ### Video
 
-<video controls preload="metadata" playsinline width="100%">
-  <source src="./Fotos%20Cerebro%203D/Cerebro_Turntable_360.mp4" type="video/mp4">
-  Tu navegador no puede reproducir este video. [Descarga el MP4](./Fotos%20Cerebro%203D/Cerebro_Turntable_360.mp4).
-</video>
+![Vista previa animada del recorrido 360° del cerebro](./Fotos%20Cerebro%203D/Cerebro_Turntable_360.gif)
 
-El video está en MP4/H.264 para facilitar su reproducción incrustada en GitHub. Para que el reproductor funcione, incluye este archivo MP4 en el repositorio junto con el README. El original en MKV también está disponible [para descargar](./Fotos%20Cerebro%203D/Cerebro_Turntable_360.mp40001-0240.mkv).
+GitHub no muestra etiquetas HTML `<video>` en un README. La imagen animada de arriba sirve como vista previa; abre el [video completo en MP4](https://github.com/Meliodas-96/Neureb/blob/main/Fotos%20Cerebro%203D/Cerebro_Turntable_360.mp4) para reproducirlo con los controles de GitHub. El original en MKV también está disponible [para descargar](./Fotos%20Cerebro%203D/Cerebro_Turntable_360.mp40001-0240.mkv).
 
 ## Funciones
 
@@ -201,12 +198,9 @@ NEUREB is an interactive web viewer for a 3D brain model, intended as a visual n
 
 ### Video
 
-<video controls preload="metadata" playsinline width="100%">
-  <source src="./Fotos%20Cerebro%203D/Cerebro_Turntable_360.mp4" type="video/mp4">
-  Your browser cannot play this video. [Download the MP4](./Fotos%20Cerebro%203D/Cerebro_Turntable_360.mp4).
-</video>
+![Animated preview of the 360° brain turntable](./Fotos%20Cerebro%203D/Cerebro_Turntable_360.gif)
 
-The video is in MP4/H.264 format for easier inline playback on GitHub. For the player to work, include this MP4 file in the repository alongside the README. The original MKV is also available [to download](./Fotos%20Cerebro%203D/Cerebro_Turntable_360.mp40001-0240.mkv).
+GitHub does not display HTML `<video>` tags in a README. The animation above works as an inline preview; open the [full MP4 video](https://github.com/Meliodas-96/Neureb/blob/main/Fotos%20Cerebro%203D/Cerebro_Turntable_360.mp4) to play it with GitHub's controls. The original MKV is also available [to download](./Fotos%20Cerebro%203D/Cerebro_Turntable_360.mp40001-0240.mkv).
 
 ## Features
 
