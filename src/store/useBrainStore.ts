@@ -18,9 +18,13 @@ interface BrainState {
   setCerebrumOpacity: (opacity: number) => void;
   toggleXRayMode: () => void;
 
-  // Hotspots
+  // Hotspots and Focus Mode
   selectedHotspotId: string | null;
   selectHotspot: (id: string | null) => void;
+  showHotspotMarkers: boolean;
+  toggleHotspotMarkers: () => void;
+  focusIsolationType: 'ghost' | 'isolate';
+  setFocusIsolationType: (type: 'ghost' | 'isolate') => void;
 
   // Camera presets
   activeCameraPreset: CameraPreset | null;
@@ -112,9 +116,15 @@ export const useBrainStore = create<BrainState>((set, get) => ({
   selectHotspot: (id) =>
     set({
       selectedHotspotId: id,
-      // If a hotspot is selected, we clear preset so they don't fight
       activeCameraPreset: null,
     }),
+
+  showHotspotMarkers: true,
+  toggleHotspotMarkers: () =>
+    set((state) => ({ showHotspotMarkers: !state.showHotspotMarkers })),
+
+  focusIsolationType: 'ghost',
+  setFocusIsolationType: (type) => set({ focusIsolationType: type }),
 
   activeCameraPreset: null,
   setCameraPreset: (preset) =>
@@ -138,5 +148,7 @@ export const useBrainStore = create<BrainState>((set, get) => ({
       activeCameraPreset: 'isometric',
       autoRotate: false,
       wireframe: false,
+      showHotspotMarkers: true,
+      focusIsolationType: 'ghost',
     }),
 }));

@@ -6,8 +6,11 @@ import { BrainModel } from './BrainModel';
 import { HotspotMarkers } from './HotspotMarkers';
 import { StudioEnvironment } from './StudioEnvironment';
 import { CameraController } from './CameraController';
+import { useBrainStore } from '@/store/useBrainStore';
 
 export function BrainCanvas() {
+  const selectHotspot = useBrainStore((state) => state.selectHotspot);
+
   return (
     <div className="w-full h-full relative cursor-grab active:cursor-grabbing select-none">
       <Canvas
@@ -23,9 +26,13 @@ export function BrainCanvas() {
           powerPreference: 'high-performance',
         }}
         dpr={[1, 2]} // High DPI crisp rendering
+        onPointerMissed={() => {
+          // Clicking empty canvas space exits focus mode and restores the whole brain
+          selectHotspot(null);
+        }}
       >
         <color attach="background" args={['#030712']} />
-        
+
         <Suspense fallback={null}>
           {/* Main Anatomical Group - Centered at coordinates origin */}
           <group position={[0, -0.175, -0.081]}>

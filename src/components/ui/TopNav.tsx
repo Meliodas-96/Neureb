@@ -2,13 +2,17 @@
 
 import React from 'react';
 import { useBrainStore } from '@/store/useBrainStore';
+import { HOTSPOTS_DATA } from '@/data/hotspots';
 import {
   RotateCw,
   Box,
   Camera,
   RotateCcw,
   Layers,
-  Activity,
+  MapPin,
+  MapPinOff,
+  Crosshair,
+  X,
 } from 'lucide-react';
 
 interface TopNavProps {
@@ -22,12 +26,19 @@ export function TopNav({ onToggleLayerPanel, isLayerPanelOpen }: TopNavProps) {
   const wireframe = useBrainStore((state) => state.wireframe);
   const toggleWireframe = useBrainStore((state) => state.toggleWireframe);
   const resetView = useBrainStore((state) => state.resetView);
+  const showHotspotMarkers = useBrainStore((state) => state.showHotspotMarkers);
+  const toggleHotspotMarkers = useBrainStore((state) => state.toggleHotspotMarkers);
+  const selectedHotspotId = useBrainStore((state) => state.selectedHotspotId);
+  const selectHotspot = useBrainStore((state) => state.selectHotspot);
+
+  const activeHotspot = selectedHotspotId
+    ? HOTSPOTS_DATA.find((h) => h.id === selectedHotspotId)
+    : null;
 
   const handleCaptureScreenshot = () => {
     const canvas = document.querySelector('canvas');
     if (!canvas) return;
 
-    // Trigger render frame download
     const dataUrl = canvas.toDataURL('image/png');
     const link = document.createElement('a');
     link.download = `neureb-neuroanatomy-${new Date().toISOString().slice(0, 10)}.png`;
@@ -72,20 +83,51 @@ export function TopNav({ onToggleLayerPanel, isLayerPanelOpen }: TopNavProps) {
         </div>
       </div>
 
-      {/* Model Spec Pills (Center - Hidden on small screens) */}
-      <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-800/60 glass-panel-subtle pointer-events-auto text-[11px] font-mono text-slate-400">
-        <span className="flex items-center gap-1">
-          <Activity className="w-3 h-3 text-red-400" />
-          Arterias ACM/ACA/Basilar
-        </span>
-        <span className="text-slate-600">|</span>
-        <span className="text-sky-400">Venas Trolard/Labbé</span>
-        <span className="text-slate-600">|</span>
-        <span className="text-amber-300">Pares Craneales</span>
-      </div>
+      {/* Center Indicator: Surgical Focus Mode Active or Model Spec */}
+      {activeHotspot ? (
+        <div className="flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl border border-cyan-500/50 bg-cyan-950/50 glass-panel pointer-events-auto shadow-lg shadow-cyan-950/60 animate-in fade-in zoom-in-95 duration-200">
+          <Crosshair className="w-3.5 h-3.5 text-cyan-400 animate-spin" style={{ animationDuration: '6s' }} />
+          <span className="text-xs font-bold text-cyan-300 tracking-wide">
+            ENFOQUE: {activeHotspot.title}
+          </span>
+          <button
+            onClick={() => selectHotspot(null)}
+            className="flex items-center gap-1 text-[11px] font-medium text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700 px-2 py-0.5 rounded-lg border border-slate-600 transition ml-1"
+            title="Desactivar enfoque y ver todo el cerebro"
+          >
+            <X className="w-3 h-3 text-cyan-400" />
+            <span>Ver Todo</span>
+          </button>
+        </div>
+      ) : (
+        <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-800/60 glass-panel-subtle pointer-events-auto text-[11px] font-mono text-slate-400">
+          <span className="text-red-400">Arterias ACM/ACA/Basilar</span>
+          <span className="text-slate-600">|</span>
+          <span className="text-blue-400">Venas Corticales</span>
+          <span className="text-slate-600">|</span>
+          <span className="text-amber-200">Pares Craneales</span>
+        </div>
+      )}
 
       {/* Action Toolbar */}
       <div className="flex items-center gap-1.5 pointer-events-auto">
+        {/* Toggle Hotspot Markers on/off */}
+        <button
+          onClick={toggleHotspotMarkers}
+          className={`p-2.5 rounded-xl border transition-all glass-panel hover:border-slate-500 ${
+            showHotspotMarkers
+              ? 'text-cyan-400 border-cyan-500/40 bg-cyan-950/30'
+              : 'text-slate-500 border-slate-800'
+          }`}
+          title={showHotspotMarkers ? 'Ocultar puntos de interés 3D' : 'Mostrar puntos de interés 3D'}
+        >
+          {showHotspotMarkers ? (
+            <MapPin className="w-4 h-4" />
+          ) : (
+            <MapPinOff className="w-4 h-4" />
+          )}
+        </button>
+
         {/* Auto Rotate Toggle */}
         <button
           onClick={toggleAutoRotate}

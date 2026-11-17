@@ -77,11 +77,29 @@ const ANATOMY_SPECS: Record<AnatomicalLayerId, AnatomyMaterialSpec> = {
   },
 };
 
+const HOTSPOT_LAYER_MAP: Record<string, AnatomicalLayerId> = {
+  mca_bifurcation: 'Artery_Cerebral_Media',
+  aca_acom: 'Artery_Cerebral_Anterior',
+  basilar_apex: 'Artery_Vertebrobasilar',
+  optic_chiasm: 'Cranial_Nerves',
+  pons_brainstem: 'Brainstem',
+  cerebellum_hemisphere: 'Cerebellum',
+  temporal_lobe: 'Cerebrum',
+  superficial_veins: 'Veins_Cerebral_Superficial',
+};
+
 export function BrainModel() {
   const { scene } = useGLTF('/models/cerebro.glb');
   const layers = useBrainStore((state) => state.layers);
   const cerebrumOpacity = useBrainStore((state) => state.cerebrumOpacity);
   const wireframe = useBrainStore((state) => state.wireframe);
+  const selectedHotspotId = useBrainStore((state) => state.selectedHotspotId);
+  const focusIsolationType = useBrainStore((state) => state.focusIsolationType);
+
+  // Target layer currently in focus (if any)
+  const focusedLayer: AnatomicalLayerId | null = selectedHotspotId
+    ? HOTSPOT_LAYER_MAP[selectedHotspotId] || null
+    : null;
 
   // Clone scene and convert materials into physical anatomical materials with distinctive colors
   const clonedScene = useMemo(() => {
@@ -94,9 +112,10 @@ export function BrainModel() {
         const spec = ANATOMY_SPECS[name];
 
         if (spec && mesh.material) {
-          const oldMat = (Array.isArray(mesh.material) ? mesh.material[0] : mesh.material) as THREE.MeshStandardMaterial;
+          const oldMat = (Array.isArray(mesh.material)
+            ? mesh.material[0]
+            : mesh.material) as THREE.MeshStandardMaterial;
 
-          // Create new MeshPhysicalMaterial preserving maps (normal, roughness)
           const newMat = new THREE.MeshPhysicalMaterial({
             color: new THREE.Color(spec.color),
             roughness: spec.roughness,
@@ -109,7 +128,6 @@ export function BrainModel() {
             map: oldMat.map || null,
           });
 
-          // If material has an embedded texture map, convert monochromatic red to realistic biological crevice shading
           if (spec.convertMapLuma && newMat.map) {
             newMat.onBeforeCompile = (shader) => {
               shader.fragmentShader = shader.fragmentShader.replace(
@@ -117,7 +135,6 @@ export function BrainModel() {
                 `
                 #ifdef USE_MAP
                   vec4 sampledDiffuseColor = texture2D( map, vMapUv );
-                  // Convert raw red texture into balanced micro-crevice illumination
                   float luma = dot(sampledDiffuseColor.rgb, vec3(0.299, 0.587, 0.114));
                   luma = clamp(pow(luma, 1.15) * 1.45, 0.35, 1.25);
                   diffuseColor.rgb *= luma;
@@ -135,51 +152,91 @@ export function BrainModel() {
     return clone;
   }, [scene]);
 
-  // Update visibility and opacity
+  // Update visibility, focus isolation, and opacity
   useEffect(() => {
     clonedScene.traverse((child) => {
       const name = child.name as AnatomicalLayerId;
-
-      // Layer Visibility check
-      if (name in layers) {
-        child.visible = layers[name];
-      }
+      const spec = ANATOMY_SPECS[name];
 
       if ((child as THREE.Mesh).isMesh) {
         const mesh = child as THREE.Mesh;
         const mat = mesh.material as THREE.MeshPhysicalMaterial;
 
-        if (mat) {
-          mat.wireframe = wireframe;
+        if (!mat || !spec) return;
 
-          // Cerebrum transparency and depth configuration
+        mat.wireframe = wireframe;
+
+        // --- CASE 1: SURGICAL FOCUS MODE (A hotspot is selected) ---
+        if (focusedLayer) {
+          if (name === focusedLayer) {
+            // Target structure: 100% full opacity, vibrant spec color + surgical emissive glow
+            child.visible = true;
+            mat.transparent = false;
+            mat.opacity = 1.0;
+            mat.depthWrite = true;
+            mat.color.set(spec.color);
+            mat.emissive.set(spec.color).multiplyScalar(0.25);
+            mat.roughness = spec.roughness * 0.85;
+            mat.clearcoat = 1.0;
+            mesh.renderOrder = 20; // Renders on top of everything
+          } else {
+            // Unrelated structures:
+            if (focusIsolationType === 'isolate') {
+              // Completely hidden
+              child.visible = false;
+            } else {
+              // Ghost mode: very subtle translucent dark-slate context silhouette
+              child.visible = layers[name];
+              mat.transparent = true;
+              mat.opacity = 0.06;
+              mat.depthWrite = false;
+              mat.color.set('#334155');
+              mat.emissive.set(0x000000);
+              mat.roughness = 0.85;
+              mat.clearcoat = 0.05;
+              mesh.renderOrder = 1;
+            }
+          }
+        } else {
+          // --- CASE 2: NORMAL OVERVIEW MODE ---
+          if (name in layers) {
+            child.visible = layers[name];
+          }
+
+          mat.emissive.set(0x000000);
+
           if (name === 'Cerebrum') {
             const isTransparent = cerebrumOpacity < 0.98;
             mat.transparent = isTransparent;
             mat.opacity = cerebrumOpacity;
             mat.depthWrite = !isTransparent;
-            
-            // In X-Ray mode, cool slightly to frosted crystal so internal vessels pop
+
             if (isTransparent) {
               mat.color.set('#c8b0aa');
               mat.roughness = 0.3;
               mat.clearcoat = 0.8;
             } else {
-              mat.color.set(ANATOMY_SPECS.Cerebrum.color);
-              mat.roughness = ANATOMY_SPECS.Cerebrum.roughness;
-              mat.clearcoat = ANATOMY_SPECS.Cerebrum.clearcoat;
+              mat.color.set(spec.color);
+              mat.roughness = spec.roughness;
+              mat.clearcoat = spec.clearcoat;
             }
 
             mesh.renderOrder = isTransparent ? 10 : 1;
           } else {
+            mat.transparent = false;
+            mat.opacity = 1.0;
+            mat.depthWrite = true;
+            mat.color.set(spec.color);
+            mat.roughness = spec.roughness;
+            mat.clearcoat = spec.clearcoat;
             mesh.renderOrder = 1;
           }
-
-          mat.needsUpdate = true;
         }
+
+        mat.needsUpdate = true;
       }
     });
-  }, [clonedScene, layers, cerebrumOpacity, wireframe]);
+  }, [clonedScene, layers, cerebrumOpacity, wireframe, focusedLayer, focusIsolationType]);
 
   return <primitive object={clonedScene} />;
 }
