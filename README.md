@@ -30,9 +30,12 @@ NEUREB es un visor web interactivo de un modelo 3D del cerebro, diseñado como r
 
 ### Video
 
-[Ver o descargar el recorrido 360° del cerebro (MKV)](./Fotos%20Cerebro%203D/Cerebro_Turntable_360.mp40001-0240.mkv)
+<video controls preload="metadata" playsinline width="100%">
+  <source src="./Fotos%20Cerebro%203D/Cerebro_Turntable_360.mp4" type="video/mp4">
+  Tu navegador no puede reproducir este video. [Descarga el MP4](./Fotos%20Cerebro%203D/Cerebro_Turntable_360.mp4).
+</video>
 
-El video está en formato MKV; según el navegador o la plataforma donde se consulte este README, puede ser necesario descargarlo y abrirlo con un reproductor compatible, por ejemplo VLC.
+El video está en MP4/H.264 para facilitar su reproducción incrustada en GitHub. Para que el reproductor funcione, incluye este archivo MP4 en el repositorio junto con el README. El original en MKV también está disponible [para descargar](./Fotos%20Cerebro%203D/Cerebro_Turntable_360.mp40001-0240.mkv).
 
 ## Funciones
 
@@ -198,9 +201,12 @@ NEUREB is an interactive web viewer for a 3D brain model, intended as a visual n
 
 ### Video
 
-[Watch or download the 360° brain turntable video (MKV)](./Fotos%20Cerebro%203D/Cerebro_Turntable_360.mp40001-0240.mkv)
+<video controls preload="metadata" playsinline width="100%">
+  <source src="./Fotos%20Cerebro%203D/Cerebro_Turntable_360.mp4" type="video/mp4">
+  Your browser cannot play this video. [Download the MP4](./Fotos%20Cerebro%203D/Cerebro_Turntable_360.mp4).
+</video>
 
-The video is in MKV format. Depending on the browser or platform displaying this README, you may need to download it and open it in a compatible player such as VLC.
+The video is in MP4/H.264 format for easier inline playback on GitHub. For the player to work, include this MP4 file in the repository alongside the README. The original MKV is also available [to download](./Fotos%20Cerebro%203D/Cerebro_Turntable_360.mp40001-0240.mkv).
 
 ## Features
 
