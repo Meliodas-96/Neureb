@@ -1,7 +1,9 @@
 # Dependencies
 node_modules/
+.pnp
+.pnp.js
 
-# Next.js
+# Next.js build output
 .next/
 out/
 build/
@@ -12,7 +14,7 @@ dist/
 *.tsbuildinfo
 next-env.d.ts
 
-# PowerShell
+# PowerShell & local scripts
 *.ps1
 
 # Environment variables and secrets
@@ -27,19 +29,19 @@ yarn-error.log*
 pnpm-debug.log*
 *.log
 
-# Python
+# Python / Local MCP
 venv/
 .venv/
 __pycache__/
 *.py[cod]
 
-# Keep only the original Blender project
+# Intermediate 3D exports (production model is loaded directly from public/models/)
+export_3d/
+
+# Blender project and backups
 Blender/*
 !Blender/Cerebro.blend
-
-# Blender backups and autosaves
-*.blend1
-*.blend2
+*.blend[0-9]*
 *.blend@
 *original.blend
 
