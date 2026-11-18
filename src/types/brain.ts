@@ -105,6 +105,9 @@ export interface HotspotData {
   targetLayer: AnatomicalLayerId;
   categoryColor: string;
   position: [number, number, number];
+  normal?: [number, number, number];
+  stemLength?: number;
+  isMacro?: boolean;
   cameraOffset: [number, number, number];
   summary: string;
   anatomy: string;

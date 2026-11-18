@@ -18,6 +18,7 @@ import {
   Check,
   GraduationCap,
   Search,
+  Activity,
 } from 'lucide-react';
 
 interface TopNavProps {
@@ -31,6 +32,8 @@ export function TopNav({ onToggleLayerPanel, isLayerPanelOpen, onOpenHelp }: Top
   const toggleAutoRotate = useBrainStore((state) => state.toggleAutoRotate);
   const wireframe = useBrainStore((state) => state.wireframe);
   const toggleWireframe = useBrainStore((state) => state.toggleWireframe);
+  const isLiveBiologicalAnimation = useBrainStore((state) => state.isLiveBiologicalAnimation);
+  const toggleLiveBiologicalAnimation = useBrainStore((state) => state.toggleLiveBiologicalAnimation);
   const resetView = useBrainStore((state) => state.resetView);
   const showHotspotMarkers = useBrainStore((state) => state.showHotspotMarkers);
   const toggleHotspotMarkers = useBrainStore((state) => state.toggleHotspotMarkers);
@@ -198,6 +201,21 @@ export function TopNav({ onToggleLayerPanel, isLayerPanelOpen, onOpenHelp }: Top
           ) : (
             <MapPinOff className="w-4 h-4" />
           )}
+        </button>
+
+        {/* Real-time Hemodynamics & Bio-pulse Toggle */}
+        <button
+          onClick={toggleLiveBiologicalAnimation}
+          className={`p-2.5 rounded-xl border transition-all glass-panel hover:border-slate-500 focus-visible:ring-2 focus-visible:ring-rose-400 focus-visible:outline-none ${
+            isLiveBiologicalAnimation
+              ? 'text-rose-400 border-rose-500/40 bg-rose-950/40 shadow-lg shadow-rose-950/40'
+              : 'text-slate-500 border-slate-800'
+          }`}
+          aria-label={isLiveBiologicalAnimation ? 'Pausar fisiología y flujo sanguíneo' : 'Activar flujo sanguíneo y pulsación en tiempo real'}
+          aria-pressed={isLiveBiologicalAnimation}
+          title={isLiveBiologicalAnimation ? 'Fisiología activa: flujo arterial/venoso y pulso cerebral' : 'Activar flujo sanguíneo y pulsación'}
+        >
+          <Activity className={`w-4 h-4 ${isLiveBiologicalAnimation ? 'animate-pulse' : ''}`} />
         </button>
 
         {/* Auto Rotate Toggle */}

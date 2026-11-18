@@ -35,6 +35,8 @@ interface BrainState {
   toggleAutoRotate: () => void;
   wireframe: boolean;
   toggleWireframe: () => void;
+  isLiveBiologicalAnimation: boolean;
+  toggleLiveBiologicalAnimation: () => void;
 
   // System filters & Search
   activeSystemFilter: string;
@@ -159,6 +161,10 @@ export const useBrainStore = create<BrainState>((set, get) => ({
   wireframe: false,
   toggleWireframe: () => set((state) => ({ wireframe: !state.wireframe })),
 
+  isLiveBiologicalAnimation: true,
+  toggleLiveBiologicalAnimation: () =>
+    set((state) => ({ isLiveBiologicalAnimation: !state.isLiveBiologicalAnimation })),
+
   activeSystemFilter: 'all',
   setActiveSystemFilter: (filter) => set({ activeSystemFilter: filter }),
 
@@ -189,6 +195,7 @@ export const useBrainStore = create<BrainState>((set, get) => ({
       activeCameraPreset: 'isometric',
       autoRotate: false,
       wireframe: false,
+      isLiveBiologicalAnimation: true,
       showHotspotMarkers: true,
       focusIsolationType: 'ghost',
       activeSystemFilter: 'all',

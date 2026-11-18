@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { useGLTF } from '@react-three/drei';
+import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useBrainStore } from '@/store/useBrainStore';
 import { AnatomicalLayerId, PrimaryLayerId } from '@/types/brain';
@@ -20,103 +21,103 @@ const ANATOMY_SPECS: Record<string, AnatomyMaterialSpec> = {
   // Legacy & Primary Layers
   Cerebrum: {
     color: '#d9a296', // Realistic organic living brain cortex pinkish-beige
-    roughness: 0.38,
+    roughness: 0.29,
     metalness: 0.02,
-    clearcoat: 0.45,
-    clearcoatRoughness: 0.25,
+    clearcoat: 0.88,
+    clearcoatRoughness: 0.14,
     convertMapLuma: true,
   },
   Cerebellum: {
     color: '#a86858', // Distinctive richer warm terracotta cerebellar folia
-    roughness: 0.42,
+    roughness: 0.33,
     metalness: 0.02,
-    clearcoat: 0.4,
-    clearcoatRoughness: 0.3,
+    clearcoat: 0.84,
+    clearcoatRoughness: 0.16,
     convertMapLuma: true,
   },
   Brainstem: {
     color: '#ecd8c3', // Distinctive pale ivory/cream neural column
-    roughness: 0.35,
+    roughness: 0.28,
     metalness: 0.02,
-    clearcoat: 0.5,
-    clearcoatRoughness: 0.2,
+    clearcoat: 0.90,
+    clearcoatRoughness: 0.12,
     convertMapLuma: true,
   },
   Artery_Cerebral_Media: {
     color: '#dc2626', // Vivid surgical carmine arterial
-    roughness: 0.18,
-    metalness: 0.08,
-    clearcoat: 0.9,
-    clearcoatRoughness: 0.1,
+    roughness: 0.14,
+    metalness: 0.06,
+    clearcoat: 0.98,
+    clearcoatRoughness: 0.08,
   },
   Artery_Cerebral_Anterior: {
     color: '#ef4444', // Bright scarlet arterial
-    roughness: 0.18,
-    metalness: 0.08,
-    clearcoat: 0.9,
-    clearcoatRoughness: 0.1,
+    roughness: 0.14,
+    metalness: 0.06,
+    clearcoat: 0.98,
+    clearcoatRoughness: 0.08,
   },
   Artery_Vertebrobasilar: {
     color: '#b91c1c', // Deep ruby arterial
-    roughness: 0.18,
-    metalness: 0.08,
-    clearcoat: 0.9,
-    clearcoatRoughness: 0.1,
+    roughness: 0.14,
+    metalness: 0.06,
+    clearcoat: 0.98,
+    clearcoatRoughness: 0.08,
   },
   Veins_Cerebral_Superficial: {
     color: '#1d4ed8', // Deep royal cobalt venous blue
-    roughness: 0.2,
-    metalness: 0.1,
-    clearcoat: 0.85,
-    clearcoatRoughness: 0.15,
+    roughness: 0.16,
+    metalness: 0.08,
+    clearcoat: 0.95,
+    clearcoatRoughness: 0.10,
   },
   Cranial_Nerves: {
     color: '#fffbeb', // Pristine ivory-white myelin
-    roughness: 0.28,
+    roughness: 0.25,
     metalness: 0.04,
-    clearcoat: 0.6,
-    clearcoatRoughness: 0.2,
+    clearcoat: 0.75,
+    clearcoatRoughness: 0.18,
   },
 
   // Segmented Cerebral Lobes
   Lobe_Frontal: {
     color: '#d9a296',
-    roughness: 0.38,
+    roughness: 0.29,
     metalness: 0.02,
-    clearcoat: 0.45,
-    clearcoatRoughness: 0.25,
+    clearcoat: 0.88,
+    clearcoatRoughness: 0.14,
     convertMapLuma: true,
   },
   Lobe_Parietal: {
     color: '#cca099',
-    roughness: 0.38,
+    roughness: 0.29,
     metalness: 0.02,
-    clearcoat: 0.45,
-    clearcoatRoughness: 0.25,
+    clearcoat: 0.88,
+    clearcoatRoughness: 0.14,
     convertMapLuma: true,
   },
   Lobe_Temporal: {
     color: '#e2a89c',
-    roughness: 0.38,
+    roughness: 0.29,
     metalness: 0.02,
-    clearcoat: 0.45,
-    clearcoatRoughness: 0.25,
+    clearcoat: 0.88,
+    clearcoatRoughness: 0.14,
     convertMapLuma: true,
   },
   Lobe_Occipital: {
     color: '#cfa59e',
-    roughness: 0.38,
+    roughness: 0.29,
     metalness: 0.02,
-    clearcoat: 0.45,
-    clearcoatRoughness: 0.25,
+    clearcoat: 0.88,
+    clearcoatRoughness: 0.14,
     convertMapLuma: true,
   },
   Lobe_Insular: {
     color: '#e8ada1',
-    roughness: 0.36,
+    roughness: 0.28,
     metalness: 0.02,
-    clearcoat: 0.5,
-    clearcoatRoughness: 0.2,
+    clearcoat: 0.90,
+    clearcoatRoughness: 0.12,
     convertMapLuma: true,
   },
 
@@ -223,6 +224,36 @@ export function BrainModel() {
   const focusIsolationType = useBrainStore((state) => state.focusIsolationType);
   const clippingAxis = useBrainStore((state) => state.clippingAxis);
   const clippingOffset = useBrainStore((state) => state.clippingOffset);
+  const isLiveBiologicalAnimation = useBrainStore((state) => state.isLiveBiologicalAnimation);
+
+  const pulsingGroupRef = useRef<THREE.Group>(null);
+  const biologicalUniforms = useRef({
+    uBioTime: { value: 0 },
+    uBioActive: { value: 1.0 },
+  });
+
+  useFrame(({ clock }) => {
+    const t = clock.getElapsedTime();
+    biologicalUniforms.current.uBioTime.value = t;
+    biologicalUniforms.current.uBioActive.value = isLiveBiologicalAnimation ? 1.0 : 0.0;
+
+    if (pulsingGroupRef.current) {
+      if (isLiveBiologicalAnimation) {
+        // Human cerebral hemodynamics: dual-peak arterial percussion (P1) and tidal (P2) wave (~68 bpm)
+        const pulseP1 = Math.sin(t * 3.8) * 0.0035;
+        const pulseP2 = Math.sin(t * 7.6 - 0.45) * 0.0014;
+        const totalPulse = pulseP1 + pulseP2;
+
+        pulsingGroupRef.current.scale.set(
+          1.0 + totalPulse * 1.15,
+          1.0 + totalPulse * 0.85,
+          1.0 + totalPulse * 1.05
+        );
+      } else {
+        pulsingGroupRef.current.scale.set(1.0, 1.0, 1.0);
+      }
+    }
+  });
 
   // Clipping plane calculation taking scene group offset into account
   const clippingPlanes = useMemo(() => {
@@ -272,21 +303,134 @@ export function BrainModel() {
             map: oldMat.map || null,
           });
 
-          if (spec.convertMapLuma && newMat.map) {
-            newMat.onBeforeCompile = (shader) => {
+          const isArtery =
+            name.startsWith('Artery_') ||
+            name === 'Artery_Cerebral_Media' ||
+            name === 'Artery_Cerebral_Anterior' ||
+            name === 'Artery_Vertebrobasilar';
+
+          const isVein =
+            name.startsWith('Veins_') ||
+            name.startsWith('Sinus_') ||
+            name === 'Veins_Cerebral_Superficial';
+
+          const isVentricles = name === 'Ventricular_System';
+
+          const isCerebrumParenchyma = name === 'Cerebrum' || LAYER_PARENT_MAP[name] === 'Cerebrum';
+          const isParenchyma =
+            isCerebrumParenchyma ||
+            name === 'Cerebellum' ||
+            name === 'Brainstem' ||
+            name.startsWith('Brainstem_') ||
+            name.startsWith('Lobe_');
+
+          newMat.customProgramCacheKey = () =>
+            isArtery
+              ? 'artery-bio'
+              : isVein
+              ? 'vein-bio'
+              : isVentricles
+              ? 'ventricle-bio'
+              : isParenchyma
+              ? 'parenchyma-bio'
+              : 'standard-bio';
+
+          newMat.onBeforeCompile = (shader) => {
+            shader.uniforms.uBioTime = biologicalUniforms.current.uBioTime;
+            shader.uniforms.uBioActive = biologicalUniforms.current.uBioActive;
+
+            shader.vertexShader = shader.vertexShader.replace(
+              '#include <common>',
+              `
+              #include <common>
+              varying vec3 vAnatomicalPos;
+              `
+            );
+            shader.vertexShader = shader.vertexShader.replace(
+              '#include <begin_vertex>',
+              `
+              #include <begin_vertex>
+              vAnatomicalPos = position;
+              `
+            );
+
+            shader.fragmentShader = shader.fragmentShader.replace(
+              '#include <common>',
+              `
+              #include <common>
+              uniform float uBioTime;
+              uniform float uBioActive;
+              varying vec3 vAnatomicalPos;
+              `
+            );
+
+            if (spec.convertMapLuma && newMat.map) {
               shader.fragmentShader = shader.fragmentShader.replace(
                 '#include <map_fragment>',
                 `
                 #ifdef USE_MAP
                   vec4 sampledDiffuseColor = texture2D( map, vMapUv );
                   float luma = dot(sampledDiffuseColor.rgb, vec3(0.299, 0.587, 0.114));
-                  luma = clamp(pow(luma, 1.15) * 1.45, 0.35, 1.25);
+                  // Enhance sulcal depth contrast for realistic deep shadow in anatomical sulci
+                  luma = clamp(pow(luma, 1.25) * 1.5, 0.25, 1.35);
                   diffuseColor.rgb *= luma;
                 #endif
                 `
               );
-            };
-          }
+            }
+
+            let bioGlsl = '';
+            if (isArtery) {
+              bioGlsl = `
+              if (uBioActive > 0.5) {
+                // Realistic vascular blood flow: pressurized arterial pulse expanding smoothly along the lumen
+                float flowCoord = (vAnatomicalPos.y * 14.0 - vAnatomicalPos.z * 16.0 + vAnatomicalPos.x * 10.0);
+                float heartWave = sin(flowCoord - uBioTime * 5.0);
+                // Organic non-linear hemodynamic pulse wave
+                float systolicPulse = pow(clamp(heartWave * 0.5 + 0.5, 0.0, 1.0), 3.0);
+                vec3 oxygenatedBlood = vec3(0.65, 0.08, 0.05) * systolicPulse;
+                gl_FragColor.rgb += oxygenatedBlood;
+              }
+              `;
+            } else if (isVein) {
+              bioGlsl = `
+              if (uBioActive > 0.5) {
+                // Deoxygenated continuous laminar venous return
+                float venousCoord = (vAnatomicalPos.y * 12.0 - vAnatomicalPos.z * 12.0);
+                float venousWave = (sin(venousCoord + uBioTime * 2.5) * 0.5 + 0.5) * 0.20;
+                gl_FragColor.rgb += vec3(0.04, 0.15, 0.40) * venousWave;
+              }
+              `;
+            } else if (isVentricles) {
+              bioGlsl = `
+              if (uBioActive > 0.5) {
+                // Dynamic crystalline CSF circulation shimmer
+                float csfCoord = (vAnatomicalPos.y * 22.0 - vAnatomicalPos.z * 12.0);
+                float csfPulse = sin(csfCoord - uBioTime * 4.2) * 0.5 + 0.5;
+                gl_FragColor.rgb += vec3(0.15, 0.75, 1.0) * csfPulse * 0.40;
+              }
+              `;
+            } else if (isParenchyma) {
+              bioGlsl = `
+              if (uBioActive > 0.5) {
+                // Natural hemodynamic capillary perfusion: subtle organic blood oxygenation blush (no artificial lines)
+                float cardiacPulse = (sin(uBioTime * 3.8) * 0.5 + 0.5);
+                vec3 perfusionColor = vec3(0.035, 0.007, 0.005) * cardiacPulse;
+                gl_FragColor.rgb += perfusionColor;
+              }
+              `;
+            }
+
+            if (bioGlsl) {
+              shader.fragmentShader = shader.fragmentShader.replace(
+                '#include <dithering_fragment>',
+                `
+                #include <dithering_fragment>
+                ${bioGlsl}
+                `
+              );
+            }
+          };
 
           mesh.material = newMat;
         }
@@ -390,7 +534,11 @@ export function BrainModel() {
     });
   }, [clonedScene, layers, cerebrumOpacity, wireframe, focusedLayer, focusIsolationType, clippingPlanes]);
 
-  return <primitive object={clonedScene} />;
+  return (
+    <group ref={pulsingGroupRef}>
+      <primitive object={clonedScene} />
+    </group>
+  );
 }
 
 useGLTF.preload('/models/cerebro.glb');
