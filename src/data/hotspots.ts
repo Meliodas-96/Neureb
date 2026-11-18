@@ -1,4 +1,18 @@
-import { HotspotData, LayerMetadata, CameraPresetConfig } from '@/types/brain';
+import { HotspotData, LayerMetadata, CameraPresetConfig, AnatomicalLayerId } from '@/types/brain';
+
+// Centralized anatomical origin offset for the entire 3D scene (eliminates magic numbers)
+export const MODEL_ORIGIN_OFFSET = [0, -0.175, -0.081] as const;
+
+export const HOTSPOT_LAYER_MAP: Record<string, AnatomicalLayerId> = {
+  mca_bifurcation: 'Artery_Cerebral_Media',
+  aca_acom: 'Artery_Cerebral_Anterior',
+  basilar_apex: 'Artery_Vertebrobasilar',
+  optic_chiasm: 'Cranial_Nerves',
+  pons_brainstem: 'Brainstem',
+  cerebellum_hemisphere: 'Cerebellum',
+  temporal_lobe: 'Cerebrum',
+  superficial_veins: 'Veins_Cerebral_Superficial',
+};
 
 export const ANATOMICAL_LAYERS: LayerMetadata[] = [
   {
@@ -81,9 +95,10 @@ export const HOTSPOTS_DATA: HotspotData[] = [
     title: 'Arteria Cerebral Media (ACM - M1/M2)',
     latinTitle: 'Arteria cerebri media (Segmentum M1/M2)',
     system: 'Arterial',
+    targetLayer: 'Artery_Cerebral_Media',
     categoryColor: '#dc2626',
     position: [-0.22, 0.24, 0.02],
-    cameraOffset: [-0.95, 0.35, 0.65], // ~1.2 units distance, frames lateral fossa comfortably
+    cameraOffset: [-0.95, 0.35, 0.65],
     summary: 'Bifurcación insular en la cisura de Silvio que da origen a las ramas operculares y corticales.',
     anatomy: 'La arteria cerebral media emerge de la carótida interna y discurre horizontalmente (segmento M1) hacia el surco lateral o de Silvio. Se divide en troncos superior e inferior (segmento M2) sobre la ínsula.',
     function: 'Irriga la corteza motora y somatosensorial primaria correspondiente a cara y extremidad superior, el área motora del lenguaje (Broca) en el hemisferio dominante y la corteza auditiva.',
@@ -95,6 +110,7 @@ export const HOTSPOTS_DATA: HotspotData[] = [
     title: 'Complejo Cerebral Anterior (ACA - A1/A2)',
     latinTitle: 'Arteria cerebri anterior & ACom',
     system: 'Arterial',
+    targetLayer: 'Artery_Cerebral_Anterior',
     categoryColor: '#ef4444',
     position: [0.0, 0.32, -0.16],
     cameraOffset: [0.0, 0.65, -1.05],
@@ -109,6 +125,7 @@ export const HOTSPOTS_DATA: HotspotData[] = [
     title: 'Tronco Basilar y Confluencia Vertebral',
     latinTitle: 'Arteria basilaris',
     system: 'Arterial',
+    targetLayer: 'Artery_Vertebrobasilar',
     categoryColor: '#b91c1c',
     position: [0.0, -0.12, 0.26],
     cameraOffset: [0.0, -0.65, 1.05],
@@ -123,6 +140,7 @@ export const HOTSPOTS_DATA: HotspotData[] = [
     title: 'Quiasma Óptico y Pares Craneales Anteriores',
     latinTitle: 'Chiasma opticum (Nervus opticus - CN II)',
     system: 'Tronco y Pares',
+    targetLayer: 'Cranial_Nerves',
     categoryColor: '#fffbeb',
     position: [0.0, 0.08, -0.12],
     cameraOffset: [0.0, 0.45, -1.05],
@@ -137,6 +155,7 @@ export const HOTSPOTS_DATA: HotspotData[] = [
     title: 'Protuberancia Anular (Pons de Varolio)',
     latinTitle: 'Pons (Truncus encephalicus)',
     system: 'Tronco y Pares',
+    targetLayer: 'Brainstem',
     categoryColor: '#ecd8c3',
     position: [0.0, -0.06, 0.16],
     cameraOffset: [0.75, -0.15, 0.95],
@@ -151,6 +170,7 @@ export const HOTSPOTS_DATA: HotspotData[] = [
     title: 'Hemisferio Cerebeloso y Vermis',
     latinTitle: 'Cerebellum (Hemispherium cerebelli)',
     system: 'Corteza y Parénquima',
+    targetLayer: 'Cerebellum',
     categoryColor: '#a86858',
     position: [0.22, -0.10, 0.32],
     cameraOffset: [0.95, -0.05, 0.95],
@@ -165,6 +185,7 @@ export const HOTSPOTS_DATA: HotspotData[] = [
     title: 'Lóbulo Temporal y Giro Parahipocampal',
     latinTitle: 'Lobus temporalis',
     system: 'Corteza y Parénquima',
+    targetLayer: 'Cerebrum',
     categoryColor: '#d9a296',
     position: [-0.30, 0.16, 0.05],
     cameraOffset: [-1.15, 0.35, 0.45],
@@ -179,6 +200,7 @@ export const HOTSPOTS_DATA: HotspotData[] = [
     title: 'Venas Corticales y Drenaje Anastomótico',
     latinTitle: 'Venae superficiales (Trolard & Labbé)',
     system: 'Venoso',
+    targetLayer: 'Veins_Cerebral_Superficial',
     categoryColor: '#1d4ed8',
     position: [-0.20, 0.36, 0.08],
     cameraOffset: [-0.85, 0.95, 0.65],

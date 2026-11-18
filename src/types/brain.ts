@@ -42,6 +42,7 @@ export interface HotspotData {
   title: string;
   latinTitle: string;
   system: 'Arterial' | 'Venoso' | 'Tronco y Pares' | 'Corteza y Parénquima';
+  targetLayer: AnatomicalLayerId;
   categoryColor: string;
   position: [number, number, number];
   cameraOffset: [number, number, number];

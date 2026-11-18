@@ -31,7 +31,11 @@ export function HotspotDetailCard() {
   };
 
   return (
-    <aside className="fixed right-3 top-16 bottom-20 z-20 w-96 max-w-[calc(100vw-1.5rem)] flex flex-col rounded-2xl border border-slate-800/80 glass-panel shadow-2xl overflow-hidden pointer-events-auto transition-all animate-in fade-in slide-in-from-right duration-200">
+    <aside
+      className="fixed right-3 top-16 bottom-20 z-40 w-96 max-w-[calc(100vw-1.5rem)] flex flex-col rounded-2xl border border-slate-800/80 bg-slate-950/98 backdrop-blur-2xl glass-panel shadow-2xl overflow-hidden pointer-events-auto transition-all animate-in fade-in slide-in-from-right duration-200"
+      role="dialog"
+      aria-label={`Ficha clínica: ${hotspot.title}`}
+    >
       {/* Header with Title and System Badge */}
       <div className="p-4 border-b border-slate-800/80 bg-slate-900/50">
         <div className="flex items-start justify-between gap-3 mb-2">
@@ -56,14 +60,16 @@ export function HotspotDetailCard() {
           <div className="flex items-center gap-1">
             <button
               onClick={handleRefocus}
-              className="p-1.5 text-slate-400 hover:text-cyan-400 hover:bg-slate-800/60 rounded-lg transition"
+              className="p-1.5 text-slate-400 hover:text-cyan-400 hover:bg-slate-800/60 rounded-lg transition focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none"
+              aria-label="Centrar y reenfocar cámara en esta estructura"
               title="Centrar y reenfocar cámara"
             >
               <Target className="w-4 h-4" />
             </button>
             <button
               onClick={() => selectHotspot(null)}
-              className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800/60 rounded-lg transition"
+              className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800/60 rounded-lg transition focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none"
+              aria-label="Cerrar ficha y ver todo el cerebro"
               title="Cerrar y ver todo el cerebro"
             >
               <X className="w-4 h-4" />
@@ -84,10 +90,12 @@ export function HotspotDetailCard() {
             <Layers className="w-3.5 h-3.5 text-slate-400" />
             Fondo:
           </span>
-          <div className="flex items-center gap-1 bg-slate-950/60 p-0.5 rounded-lg border border-slate-800">
+          <div className="flex items-center gap-1 bg-slate-950/60 p-0.5 rounded-lg border border-slate-800" role="radiogroup" aria-label="Tipo de fondo en modo enfoque">
             <button
               onClick={() => setFocusIsolationType('ghost')}
-              className={`px-2 py-0.5 rounded text-[10px] font-medium transition ${
+              role="radio"
+              aria-checked={focusIsolationType === 'ghost'}
+              className={`px-2 py-0.5 rounded text-[10px] font-medium transition focus-visible:ring-1 focus-visible:ring-cyan-400 focus-visible:outline-none ${
                 focusIsolationType === 'ghost'
                   ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-400/30'
                   : 'text-slate-400 hover:text-slate-200'
@@ -97,7 +105,9 @@ export function HotspotDetailCard() {
             </button>
             <button
               onClick={() => setFocusIsolationType('isolate')}
-              className={`px-2 py-0.5 rounded text-[10px] font-medium transition ${
+              role="radio"
+              aria-checked={focusIsolationType === 'isolate'}
+              className={`px-2 py-0.5 rounded text-[10px] font-medium transition focus-visible:ring-1 focus-visible:ring-cyan-400 focus-visible:outline-none ${
                 focusIsolationType === 'isolate'
                   ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-400/30'
                   : 'text-slate-400 hover:text-slate-200'
@@ -165,7 +175,8 @@ export function HotspotDetailCard() {
       <div className="p-3 border-t border-slate-800/80 bg-slate-900/50 flex items-center gap-2">
         <button
           onClick={handleRefocus}
-          className="flex-1 py-2 px-3 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/40 text-cyan-300 font-semibold text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-cyan-950/40"
+          className="flex-1 py-2 px-3 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/40 text-cyan-300 font-semibold text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-cyan-950/40 focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none"
+          aria-label="Reenfocar la estructura en el centro"
         >
           <Target className="w-3.5 h-3.5" />
           Reenfocar
@@ -173,7 +184,8 @@ export function HotspotDetailCard() {
 
         <button
           onClick={() => selectHotspot(null)}
-          className="py-2 px-3 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white font-medium text-xs transition flex items-center justify-center gap-1.5"
+          className="py-2 px-3 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white font-medium text-xs transition flex items-center justify-center gap-1.5 focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none"
+          aria-label="Salir del modo enfoque y ver todo el cerebro"
           title="Restablecer vista y ver todo el cerebro"
         >
           <X className="w-3.5 h-3.5" />

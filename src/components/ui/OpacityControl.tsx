@@ -11,15 +11,21 @@ export function OpacityControl() {
   const toggleXRayMode = useBrainStore((state) => state.toggleXRayMode);
 
   return (
-    <div className="fixed bottom-20 left-3 z-20 flex flex-col sm:flex-row items-center gap-3 p-3 rounded-2xl border border-slate-800/80 glass-panel shadow-2xl pointer-events-auto">
+    <div
+      className="fixed bottom-20 left-3 z-30 flex flex-col sm:flex-row items-center gap-3 p-3 rounded-2xl border border-slate-800/80 bg-slate-950/98 backdrop-blur-2xl glass-panel shadow-2xl pointer-events-auto"
+      role="region"
+      aria-label="Control de transparencia y modo Rayos X"
+    >
       {/* Quick X-Ray Toggle Button */}
       <button
         onClick={toggleXRayMode}
-        className={`px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 border transition-all ${
+        className={`px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 border transition-all focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none ${
           isXRayMode
             ? 'bg-cyan-500/20 text-cyan-300 border-cyan-400/50 shadow-lg shadow-cyan-950/50'
             : 'bg-slate-900/60 text-slate-300 border-slate-700/60 hover:border-slate-500'
         }`}
+        aria-pressed={isXRayMode}
+        aria-label={isXRayMode ? 'Desactivar modo Rayos X' : 'Activar modo Rayos X (22% de opacidad)'}
         title="Conmutar Modo Rayos X rápido"
       >
         <Sparkles className={`w-3.5 h-3.5 ${isXRayMode ? 'text-cyan-400 animate-spin' : 'text-slate-400'}`} />
@@ -28,23 +34,28 @@ export function OpacityControl() {
 
       {/* Opacity Slider */}
       <div className="flex items-center gap-3 w-48 sm:w-56">
-        <div className="flex items-center gap-1.5 text-xs text-slate-300 font-medium shrink-0">
+        <label htmlFor="cerebrum-opacity-slider" className="flex items-center gap-1.5 text-xs text-slate-300 font-medium shrink-0 cursor-pointer">
           <Eye className="w-3.5 h-3.5 text-slate-400" />
           <span className="hidden sm:inline">Corteza:</span>
-        </div>
+        </label>
 
         <input
+          id="cerebrum-opacity-slider"
           type="range"
           min="0.15"
           max="1.0"
           step="0.01"
           value={cerebrumOpacity}
           onChange={(e) => setCerebrumOpacity(parseFloat(e.target.value))}
-          className="w-full accent-cyan-400 cursor-pointer"
+          className="w-full accent-cyan-400 cursor-pointer focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none"
+          aria-label="Deslizador de opacidad de la corteza cerebral"
+          aria-valuemin={15}
+          aria-valuemax={100}
+          aria-valuenow={Math.round(cerebrumOpacity * 100)}
           title={`Opacidad corteza: ${(cerebrumOpacity * 100).toFixed(0)}%`}
         />
 
-        <span className="text-[11px] font-mono font-semibold text-cyan-400 w-9 text-right shrink-0">
+        <span className="text-[11px] font-mono font-semibold text-cyan-400 w-9 text-right shrink-0" aria-live="polite">
           {(cerebrumOpacity * 100).toFixed(0)}%
         </span>
       </div>

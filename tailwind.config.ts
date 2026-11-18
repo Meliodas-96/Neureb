@@ -11,7 +11,7 @@ const config: Config = {
     extend: {
       colors: {
         clinical: {
-          bg: "#030712", // obsidian deep dark
+          bg: "#030712",
           card: "rgba(15, 23, 42, 0.75)",
           border: "rgba(51, 65, 85, 0.5)",
           cyan: "#06b6d4",
@@ -39,7 +39,7 @@ const config: Config = {
       },
     },
   },
-  plugins: [],
+  plugins: [require("tailwindcss-animate")],
 };
 
 export default config;

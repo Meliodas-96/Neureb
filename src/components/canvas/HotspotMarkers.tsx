@@ -2,21 +2,9 @@
 
 import React, { useState } from 'react';
 import { Html } from '@react-three/drei';
-import { HOTSPOTS_DATA } from '@/data/hotspots';
+import { HOTSPOTS_DATA, HOTSPOT_LAYER_MAP } from '@/data/hotspots';
 import { useBrainStore } from '@/store/useBrainStore';
-import { AnatomicalLayerId } from '@/types/brain';
 import { Crosshair } from 'lucide-react';
-
-const HOTSPOT_LAYER_MAP: Record<string, AnatomicalLayerId> = {
-  mca_bifurcation: 'Artery_Cerebral_Media',
-  aca_acom: 'Artery_Cerebral_Anterior',
-  basilar_apex: 'Artery_Vertebrobasilar',
-  optic_chiasm: 'Cranial_Nerves',
-  pons_brainstem: 'Brainstem',
-  cerebellum_hemisphere: 'Cerebellum',
-  temporal_lobe: 'Cerebrum',
-  superficial_veins: 'Veins_Cerebral_Superficial',
-};
 
 export function HotspotMarkers() {
   const selectedHotspotId = useBrainStore((state) => state.selectedHotspotId);
@@ -33,9 +21,6 @@ export function HotspotMarkers() {
         const isSelected = selectedHotspotId === hotspot.id;
         const isHovered = hoveredId === hotspot.id;
 
-        // Visibility condition:
-        // When a hotspot is selected: ONLY that hotspot remains visible
-        // When no hotspot is selected: all hotspots belonging to visible layers are shown
         const isVisible =
           showHotspotMarkers &&
           isParentVisible &&
@@ -47,17 +32,13 @@ export function HotspotMarkers() {
             position={hotspot.position}
             visible={isVisible}
           >
-            {/* 
-              CRITICAL FIX FOR REACT 19 + DREI <Html> ROOT UNMOUNTING:
-              We keep the <Html> component mounted permanently in the DOM tree
-              and toggle display/opacity via CSS. This prevents Drei from calling
-              root.unmount() during concurrent render, which resolves both:
-              1) "Failed to execute 'removeChild' on 'Node'"
-              2) "Attempted to synchronously unmount a root while React was already rendering"
+            {/*
+              zIndexRange is strictly set to [5, 0] so 3D HTML pins stay in the 3D layer (z <= 5)
+              and NEVER bleed over UI panels (which are at z-40 and z-50).
             */}
             <Html
               center
-              zIndexRange={[100, 0]}
+              zIndexRange={[5, 0]}
               style={{
                 display: isVisible ? 'flex' : 'none',
                 pointerEvents: isVisible ? 'auto' : 'none',
@@ -73,21 +54,28 @@ export function HotspotMarkers() {
                 }}
                 onMouseEnter={() => setHoveredId(hotspot.id)}
                 onMouseLeave={() => setHoveredId(null)}
+                role="button"
+                tabIndex={isVisible ? 0 : -1}
+                aria-label={`Punto anatómico: ${hotspot.title}`}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    selectHotspot(isSelected ? null : hotspot.id);
+                  }
+                }}
               >
                 {isSelected ? (
-                  /* SLEEK SURGICAL FOCUS RETICLE FOR THE SELECTED HOTSPOT */
                   <div className="relative flex items-center justify-center">
                     <div
                       className="absolute w-12 h-12 rounded-full border border-dashed border-cyan-400/80 animate-spin"
                       style={{ animationDuration: '8s' }}
                     />
                     <div className="absolute w-8 h-8 rounded-full border border-cyan-400/60 bg-cyan-500/10 animate-ping-slow" />
-                    <div className="relative w-6 h-6 rounded-full bg-slate-950/80 border border-cyan-400 flex items-center justify-center shadow-lg shadow-cyan-900/60">
+                    <div className="relative w-6 h-6 rounded-full bg-slate-950/90 border border-cyan-400 flex items-center justify-center shadow-lg shadow-cyan-900/60">
                       <Crosshair className="w-3.5 h-3.5 text-cyan-300" />
                     </div>
                   </div>
                 ) : (
-                  /* COMPACT ANATOMICAL PIN (When in overview mode) */
                   <>
                     <div
                       className="absolute w-5 h-5 rounded-full pointer-events-none animate-radar"
@@ -108,7 +96,7 @@ export function HotspotMarkers() {
                     </div>
 
                     {isHovered && (
-                      <div className="absolute left-4 top-1/2 -translate-y-1/2 whitespace-nowrap px-2.5 py-1 rounded-lg text-[11px] font-medium backdrop-blur-md border border-slate-700/80 bg-slate-950/95 text-slate-100 shadow-xl z-50 pointer-events-none">
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2 whitespace-nowrap px-2.5 py-1 rounded-lg text-[11px] font-medium backdrop-blur-md border border-slate-700/80 bg-slate-950/95 text-slate-100 shadow-xl z-10 pointer-events-none">
                         <div className="flex items-center gap-1.5">
                           <span
                             className="w-1.5 h-1.5 rounded-full inline-block"

@@ -3,7 +3,7 @@
 import React from 'react';
 import { ContactShadows } from '@react-three/drei';
 import { useBrainStore } from '@/store/useBrainStore';
-import { HOTSPOTS_DATA } from '@/data/hotspots';
+import { HOTSPOTS_DATA, MODEL_ORIGIN_OFFSET } from '@/data/hotspots';
 
 export function StudioEnvironment() {
   const selectedHotspotId = useBrainStore((state) => state.selectedHotspotId);
@@ -52,9 +52,9 @@ export function StudioEnvironment() {
       {activeHotspot && (
         <pointLight
           position={[
-            activeHotspot.position[0] + activeHotspot.cameraOffset[0] * 0.4,
-            activeHotspot.position[1] - 0.175 + activeHotspot.cameraOffset[1] * 0.4,
-            activeHotspot.position[2] - 0.081 + activeHotspot.cameraOffset[2] * 0.4,
+            activeHotspot.position[0] + MODEL_ORIGIN_OFFSET[0] + activeHotspot.cameraOffset[0] * 0.4,
+            activeHotspot.position[1] + MODEL_ORIGIN_OFFSET[1] + activeHotspot.cameraOffset[1] * 0.4,
+            activeHotspot.position[2] + MODEL_ORIGIN_OFFSET[2] + activeHotspot.cameraOffset[2] * 0.4,
           ]}
           intensity={3.2}
           distance={2.8}

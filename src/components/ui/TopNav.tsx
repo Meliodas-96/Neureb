@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useBrainStore } from '@/store/useBrainStore';
 import { HOTSPOTS_DATA } from '@/data/hotspots';
 import {
@@ -13,14 +13,18 @@ import {
   MapPinOff,
   Crosshair,
   X,
+  HelpCircle,
+  Share2,
+  Check,
 } from 'lucide-react';
 
 interface TopNavProps {
   onToggleLayerPanel: () => void;
   isLayerPanelOpen: boolean;
+  onOpenHelp: () => void;
 }
 
-export function TopNav({ onToggleLayerPanel, isLayerPanelOpen }: TopNavProps) {
+export function TopNav({ onToggleLayerPanel, isLayerPanelOpen, onOpenHelp }: TopNavProps) {
   const autoRotate = useBrainStore((state) => state.autoRotate);
   const toggleAutoRotate = useBrainStore((state) => state.toggleAutoRotate);
   const wireframe = useBrainStore((state) => state.wireframe);
@@ -30,6 +34,8 @@ export function TopNav({ onToggleLayerPanel, isLayerPanelOpen }: TopNavProps) {
   const toggleHotspotMarkers = useBrainStore((state) => state.toggleHotspotMarkers);
   const selectedHotspotId = useBrainStore((state) => state.selectedHotspotId);
   const selectHotspot = useBrainStore((state) => state.selectHotspot);
+
+  const [copiedLink, setCopiedLink] = useState(false);
 
   const activeHotspot = selectedHotspotId
     ? HOTSPOTS_DATA.find((h) => h.id === selectedHotspotId)
@@ -46,18 +52,26 @@ export function TopNav({ onToggleLayerPanel, isLayerPanelOpen }: TopNavProps) {
     link.click();
   };
 
+  const handleCopyShareLink = () => {
+    if (typeof window === 'undefined') return;
+    navigator.clipboard.writeText(window.location.href);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2000);
+  };
+
   return (
-    <header className="fixed top-3 left-3 right-3 z-30 flex items-center justify-between pointer-events-none">
+    <header className="fixed top-3 left-3 right-3 z-40 flex items-center justify-between pointer-events-none" role="banner">
       {/* Brand & Anatomical Identifier */}
       <div className="flex items-center gap-3 pointer-events-auto">
         <button
           onClick={onToggleLayerPanel}
-          className={`px-3 py-2 rounded-xl flex items-center gap-2 border transition-all glass-panel hover:border-cyan-500/50 ${
+          className={`px-3 py-2 rounded-xl flex items-center gap-2 border transition-all glass-panel hover:border-cyan-500/50 focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none ${
             isLayerPanelOpen
               ? 'text-cyan-400 border-cyan-500/40 shadow-lg shadow-cyan-950/30'
               : 'text-slate-300 border-slate-700/60'
           }`}
-          title="Abrir/Cerrar panel de capas"
+          aria-label={isLayerPanelOpen ? 'Cerrar panel de capas' : 'Abrir panel de capas'}
+          aria-expanded={isLayerPanelOpen}
         >
           <Layers className="w-4 h-4 text-cyan-400" />
           <span className="text-xs font-semibold uppercase tracking-wider hidden sm:inline">
@@ -92,8 +106,8 @@ export function TopNav({ onToggleLayerPanel, isLayerPanelOpen }: TopNavProps) {
           </span>
           <button
             onClick={() => selectHotspot(null)}
-            className="flex items-center gap-1 text-[11px] font-medium text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700 px-2 py-0.5 rounded-lg border border-slate-600 transition ml-1"
-            title="Desactivar enfoque y ver todo el cerebro"
+            className="flex items-center gap-1 text-[11px] font-medium text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700 px-2 py-0.5 rounded-lg border border-slate-600 transition ml-1 focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none"
+            aria-label="Desactivar enfoque y ver todo el cerebro"
           >
             <X className="w-3 h-3 text-cyan-400" />
             <span>Ver Todo</span>
@@ -110,15 +124,29 @@ export function TopNav({ onToggleLayerPanel, isLayerPanelOpen }: TopNavProps) {
       )}
 
       {/* Action Toolbar */}
-      <div className="flex items-center gap-1.5 pointer-events-auto">
+      <div className="flex items-center gap-1.5 pointer-events-auto" role="toolbar" aria-label="Herramientas del visor 3D">
+        {/* Share View Link */}
+        <button
+          onClick={handleCopyShareLink}
+          className={`p-2.5 rounded-xl border transition-all glass-panel hover:border-slate-500 focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none ${
+            copiedLink ? 'text-emerald-400 border-emerald-500/50 bg-emerald-950/40' : 'text-slate-400 border-slate-800'
+          }`}
+          aria-label={copiedLink ? 'Enlace copiado al portapapeles' : 'Copiar enlace directo con vista activa'}
+          title={copiedLink ? '¡Enlace copiado!' : 'Copiar enlace directo con vista activa'}
+        >
+          {copiedLink ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
+        </button>
+
         {/* Toggle Hotspot Markers on/off */}
         <button
           onClick={toggleHotspotMarkers}
-          className={`p-2.5 rounded-xl border transition-all glass-panel hover:border-slate-500 ${
+          className={`p-2.5 rounded-xl border transition-all glass-panel hover:border-slate-500 focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none ${
             showHotspotMarkers
               ? 'text-cyan-400 border-cyan-500/40 bg-cyan-950/30'
               : 'text-slate-500 border-slate-800'
           }`}
+          aria-label={showHotspotMarkers ? 'Ocultar puntos de interés 3D' : 'Mostrar puntos de interés 3D'}
+          aria-pressed={showHotspotMarkers}
           title={showHotspotMarkers ? 'Ocultar puntos de interés 3D' : 'Mostrar puntos de interés 3D'}
         >
           {showHotspotMarkers ? (
@@ -131,11 +159,13 @@ export function TopNav({ onToggleLayerPanel, isLayerPanelOpen }: TopNavProps) {
         {/* Auto Rotate Toggle */}
         <button
           onClick={toggleAutoRotate}
-          className={`p-2.5 rounded-xl border transition-all glass-panel hover:border-slate-500 ${
+          className={`p-2.5 rounded-xl border transition-all glass-panel hover:border-slate-500 focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none ${
             autoRotate
               ? 'text-cyan-400 border-cyan-500/50 bg-cyan-950/30 shadow-lg shadow-cyan-950/40'
               : 'text-slate-400 border-slate-800'
           }`}
+          aria-label={autoRotate ? 'Pausar rotación automática' : 'Activar rotación automática'}
+          aria-pressed={autoRotate}
           title={autoRotate ? 'Pausar rotación' : 'Rotación automática continua'}
         >
           <RotateCw className={`w-4 h-4 ${autoRotate ? 'animate-spin' : ''}`} />
@@ -144,11 +174,13 @@ export function TopNav({ onToggleLayerPanel, isLayerPanelOpen }: TopNavProps) {
         {/* Wireframe Hologram Toggle */}
         <button
           onClick={toggleWireframe}
-          className={`p-2.5 rounded-xl border transition-all glass-panel hover:border-slate-500 ${
+          className={`p-2.5 rounded-xl border transition-all glass-panel hover:border-slate-500 focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none ${
             wireframe
               ? 'text-cyan-300 border-cyan-400/60 bg-cyan-950/40'
               : 'text-slate-400 border-slate-800'
           }`}
+          aria-label={wireframe ? 'Desactivar modo malla wireframe' : 'Activar modo malla wireframe'}
+          aria-pressed={wireframe}
           title={wireframe ? 'Desactivar malla wireframe' : 'Modo malla holográfica'}
         >
           <Box className="w-4 h-4" />
@@ -157,17 +189,29 @@ export function TopNav({ onToggleLayerPanel, isLayerPanelOpen }: TopNavProps) {
         {/* Capture Snapshot */}
         <button
           onClick={handleCaptureScreenshot}
-          className="p-2.5 rounded-xl border border-slate-800 text-slate-400 hover:text-slate-100 hover:border-slate-500 transition-all glass-panel"
+          className="p-2.5 rounded-xl border border-slate-800 text-slate-400 hover:text-slate-100 hover:border-slate-500 transition-all glass-panel focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none"
+          aria-label="Captura de pantalla HD en formato PNG"
           title="Captura de pantalla HD (PNG)"
         >
           <Camera className="w-4 h-4" />
         </button>
 
+        {/* Help / Controls Guide Modal */}
+        <button
+          onClick={onOpenHelp}
+          className="p-2.5 rounded-xl border border-slate-800 text-slate-400 hover:text-cyan-400 hover:border-cyan-500/50 transition-all glass-panel focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none"
+          aria-label="Abrir guía de ayuda y controles de navegación"
+          title="Guía de navegación y atajos [?]"
+        >
+          <HelpCircle className="w-4 h-4" />
+        </button>
+
         {/* Reset View */}
         <button
           onClick={resetView}
-          className="p-2.5 rounded-xl border border-slate-800 text-slate-400 hover:text-slate-100 hover:border-slate-500 transition-all glass-panel"
-          title="Restablecer orientación, capas y zoom"
+          className="p-2.5 rounded-xl border border-slate-800 text-slate-400 hover:text-slate-100 hover:border-slate-500 transition-all glass-panel focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none"
+          aria-label="Restablecer orientación, capas y zoom a valores predeterminados"
+          title="Restablecer vista completa"
         >
           <RotateCcw className="w-4 h-4" />
         </button>

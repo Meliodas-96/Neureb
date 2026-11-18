@@ -6,7 +6,7 @@ import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 import { useBrainStore } from '@/store/useBrainStore';
-import { CAMERA_PRESETS, HOTSPOTS_DATA } from '@/data/hotspots';
+import { CAMERA_PRESETS, HOTSPOTS_DATA, MODEL_ORIGIN_OFFSET } from '@/data/hotspots';
 
 export function CameraController() {
   const controlsRef = useRef<OrbitControlsImpl>(null);
@@ -21,7 +21,7 @@ export function CameraController() {
   const isTransitioning = useRef(false);
 
   // Group offset applied to the brain model
-  const GROUP_OFFSET = new THREE.Vector3(0, -0.175, -0.081);
+  const GROUP_OFFSET = new THREE.Vector3(...MODEL_ORIGIN_OFFSET);
 
   // React to Camera Preset triggers
   useEffect(() => {
@@ -39,10 +39,8 @@ export function CameraController() {
     if (!selectedHotspotId) return;
     const hotspot = HOTSPOTS_DATA.find((h) => h.id === selectedHotspotId);
     if (hotspot) {
-      // Hotspot position in world coordinates (adding group offset)
       const worldHotspot = new THREE.Vector3(...hotspot.position).add(GROUP_OFFSET);
       
-      // Calculate eye position based on camera offset
       const eye = new THREE.Vector3(
         worldHotspot.x + hotspot.cameraOffset[0],
         worldHotspot.y + hotspot.cameraOffset[1],
@@ -89,7 +87,6 @@ export function CameraController() {
       autoRotate={autoRotate && !isTransitioning.current}
       autoRotateSpeed={1.2}
       onStart={() => {
-        // User manually intervened, interrupt smooth programmatic transition
         isTransitioning.current = false;
       }}
     />

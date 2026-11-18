@@ -5,6 +5,7 @@ import { useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import { useBrainStore } from '@/store/useBrainStore';
 import { AnatomicalLayerId } from '@/types/brain';
+import { HOTSPOT_LAYER_MAP } from '@/data/hotspots';
 
 interface AnatomyMaterialSpec {
   color: string;
@@ -75,17 +76,6 @@ const ANATOMY_SPECS: Record<AnatomicalLayerId, AnatomyMaterialSpec> = {
     clearcoat: 0.6,
     clearcoatRoughness: 0.2,
   },
-};
-
-const HOTSPOT_LAYER_MAP: Record<string, AnatomicalLayerId> = {
-  mca_bifurcation: 'Artery_Cerebral_Media',
-  aca_acom: 'Artery_Cerebral_Anterior',
-  basilar_apex: 'Artery_Vertebrobasilar',
-  optic_chiasm: 'Cranial_Nerves',
-  pons_brainstem: 'Brainstem',
-  cerebellum_hemisphere: 'Cerebellum',
-  temporal_lobe: 'Cerebrum',
-  superficial_veins: 'Veins_Cerebral_Superficial',
 };
 
 export function BrainModel() {
@@ -178,14 +168,12 @@ export function BrainModel() {
             mat.emissive.set(spec.color).multiplyScalar(0.25);
             mat.roughness = spec.roughness * 0.85;
             mat.clearcoat = 1.0;
-            mesh.renderOrder = 20; // Renders on top of everything
+            mesh.renderOrder = 20;
           } else {
             // Unrelated structures:
             if (focusIsolationType === 'isolate') {
-              // Completely hidden
               child.visible = false;
             } else {
-              // Ghost mode: very subtle translucent dark-slate context silhouette
               child.visible = layers[name];
               mat.transparent = true;
               mat.opacity = 0.06;
