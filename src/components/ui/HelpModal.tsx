@@ -106,11 +106,21 @@ export function HelpModal({ isOpen, onClose }: HelpModalProps) {
         </div>
 
         <div className="flex items-start gap-3 p-3 rounded-xl bg-slate-950/40 border border-slate-800/60">
+          <Sparkles className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+          <div>
+            <p className="font-semibold text-slate-200">Cortes 3D en Tiempo Real</p>
+            <p className="text-slate-400 text-[11px] leading-relaxed mt-0.5">
+              Usa el botón <strong>Cortes 3D</strong> para seccionar el cerebro sagitalmente (cara medial y cuerpo calloso), coronalmente o axialmente.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-start gap-3 p-3 rounded-xl bg-slate-950/40 border border-slate-800/60">
           <Keyboard className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
           <div>
             <p className="font-semibold text-slate-200">Atajos de Teclado</p>
             <p className="text-slate-400 text-[11px] leading-relaxed mt-0.5">
-              Pulsa <kbd className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-cyan-300 font-mono text-[10px]">Esc</kbd> o haz clic en cualquier fondo vacío para salir de cualquier enfoque y ver el cerebro completo.
+              Pulsa <kbd className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-cyan-300 font-mono text-[10px]">⌘K</kbd> o <kbd className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-cyan-300 font-mono text-[10px]">/</kbd> para abrir el buscador de anatomía. Pulsa <kbd className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-cyan-300 font-mono text-[10px]">Esc</kbd> o haz clic fuera para cerrar cualquier modal o salir de un enfoque 3D. Pulsa <kbd className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-cyan-300 font-mono text-[10px]">?</kbd> para esta guía.
             </p>
           </div>
         </div>

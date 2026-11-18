@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Html } from '@react-three/drei';
-import { HOTSPOTS_DATA, HOTSPOT_LAYER_MAP } from '@/data/hotspots';
+import { HOTSPOTS_DATA, HOTSPOT_LAYER_MAP, LAYER_PARENT_MAP } from '@/data/hotspots';
 import { useBrainStore } from '@/store/useBrainStore';
 import { Crosshair } from 'lucide-react';
 
@@ -11,20 +11,32 @@ export function HotspotMarkers() {
   const selectHotspot = useBrainStore((state) => state.selectHotspot);
   const layers = useBrainStore((state) => state.layers);
   const showHotspotMarkers = useBrainStore((state) => state.showHotspotMarkers);
+  const activeSystemFilter = useBrainStore((state) => state.activeSystemFilter);
+  const searchQuery = useBrainStore((state) => state.searchQuery);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+
+  const cleanQuery = searchQuery.trim().toLowerCase();
 
   return (
     <group name="hotspots-group">
       {HOTSPOTS_DATA.map((hotspot) => {
-        const parentLayer = HOTSPOT_LAYER_MAP[hotspot.id];
-        const isParentVisible = !parentLayer || layers[parentLayer];
+        const targetLayer = HOTSPOT_LAYER_MAP[hotspot.id];
+        const primaryLayer = targetLayer ? LAYER_PARENT_MAP[targetLayer] : null;
+        const isParentVisible = !primaryLayer || layers[primaryLayer];
         const isSelected = selectedHotspotId === hotspot.id;
         const isHovered = hoveredId === hotspot.id;
+
+        const matchesSystem = activeSystemFilter === 'all' || hotspot.system === activeSystemFilter;
+        const matchesSearch = !cleanQuery ||
+          hotspot.title.toLowerCase().includes(cleanQuery) ||
+          hotspot.latinTitle.toLowerCase().includes(cleanQuery) ||
+          hotspot.summary.toLowerCase().includes(cleanQuery) ||
+          hotspot.system.toLowerCase().includes(cleanQuery);
 
         const isVisible =
           showHotspotMarkers &&
           isParentVisible &&
-          (!selectedHotspotId || isSelected);
+          (isSelected || (!selectedHotspotId && matchesSystem && matchesSearch));
 
         return (
           <group

@@ -9,6 +9,9 @@ import { CameraPresetBar } from '@/components/ui/CameraPresetBar';
 import { HotspotDetailCard } from '@/components/ui/HotspotDetailCard';
 import { LoadingScreen } from '@/components/ui/LoadingScreen';
 import { HelpModal } from '@/components/ui/HelpModal';
+import { HotspotSearchFilter } from '@/components/ui/HotspotSearchFilter';
+import { ClippingControl } from '@/components/ui/ClippingControl';
+import { StudyQuizModal } from '@/components/ui/StudyQuizModal';
 import { UrlStateSync } from '@/components/ui/UrlStateSync';
 import { useBrainStore } from '@/store/useBrainStore';
 
@@ -17,15 +20,36 @@ export default function Home() {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const selectHotspot = useBrainStore((state) => state.selectHotspot);
   const selectedHotspotId = useBrainStore((state) => state.selectedHotspotId);
+  const isQuizOpen = useBrainStore((state) => state.isQuizOpen);
+  const setIsQuizOpen = useBrainStore((state) => state.setIsQuizOpen);
+  const isSearchOpen = useBrainStore((state) => state.isSearchOpen);
+  const setIsSearchOpen = useBrainStore((state) => state.setIsSearchOpen);
 
   // Global Keyboard shortcuts:
-  // - Escape: closes help modal first, or exits surgical focus mode
+  // - Cmd+K / Ctrl+K / '/': opens neuroanatomy search modal
+  // - Escape: closes search modal, help modal, quiz, or exits surgical focus mode
   // - '?' / 'h': toggles help modal
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsSearchOpen(!isSearchOpen);
+        return;
+      }
+
+      if (e.key === '/' && document.activeElement?.tagName !== 'INPUT') {
+        e.preventDefault();
+        setIsSearchOpen(true);
+        return;
+      }
+
       if (e.key === 'Escape') {
-        if (isHelpOpen) {
+        if (isSearchOpen) {
+          setIsSearchOpen(false);
+        } else if (isHelpOpen) {
           setIsHelpOpen(false);
+        } else if (isQuizOpen) {
+          setIsQuizOpen(false);
         } else if (selectedHotspotId) {
           selectHotspot(null);
         }
@@ -38,7 +62,7 @@ export default function Home() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectHotspot, selectedHotspotId, isHelpOpen]);
+  }, [selectHotspot, selectedHotspotId, isHelpOpen, isQuizOpen, setIsQuizOpen, isSearchOpen, setIsSearchOpen]);
 
   return (
     <main className="relative w-screen h-screen overflow-hidden bg-clinical-bg">
@@ -58,11 +82,17 @@ export default function Home() {
         onOpenHelp={() => setIsHelpOpen((prev) => !prev)}
       />
 
+      {/* Real-time Neuroanatomy Search & System Filter Bar */}
+      <HotspotSearchFilter />
+
       {/* Anatomical Layer Visibility Drawer (Left) */}
       <LayerPanel
         isOpen={isLayerPanelOpen}
         onClose={() => setIsLayerPanelOpen(false)}
       />
+
+      {/* Real-time 3D Cross-Section Clipping Controls */}
+      <ClippingControl />
 
       {/* Opacity and X-Ray Modes (Bottom Left) */}
       <OpacityControl />
@@ -73,6 +103,7 @@ export default function Home() {
       {/* 
         Right Floating Slot:
         If Help is open, display the Help Panel.
+        Otherwise, if Quiz is open, display the Quiz / Tour Academy.
         Otherwise, if a Hotspot is selected, display the Medical Info Drawer.
         Zero full-screen blackout or backdrop blur over the 3D scene!
       */}
@@ -81,6 +112,8 @@ export default function Home() {
           isOpen={isHelpOpen}
           onClose={() => setIsHelpOpen(false)}
         />
+      ) : isQuizOpen ? (
+        <StudyQuizModal />
       ) : (
         <HotspotDetailCard />
       )}

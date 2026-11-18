@@ -10,9 +10,9 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
-  ),
+  metadataBase: process.env.NEXT_PUBLIC_SITE_URL
+    ? new URL(process.env.NEXT_PUBLIC_SITE_URL)
+    : undefined,
   title: {
     default: 'NEUREB | Atlas Neuroanatómico 3D de Alta Precisión',
     template: '%s | NEUREB 3D',
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     title: 'NEUREB | Atlas Neuroanatómico 3D de Alta Precisión',
     description:
       'Exploración anatómica 3D con sombreado PBR realista, modo rayos X interactivo, aislamiento quirúrgico y fichas patológicas.',
-    url: 'http://localhost:3000',
+    url: '/',
     siteName: 'NEUREB 3D Neuroanatomy',
     images: [
       {

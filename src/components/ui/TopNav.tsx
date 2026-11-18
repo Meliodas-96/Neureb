@@ -16,6 +16,8 @@ import {
   HelpCircle,
   Share2,
   Check,
+  GraduationCap,
+  Search,
 } from 'lucide-react';
 
 interface TopNavProps {
@@ -34,6 +36,14 @@ export function TopNav({ onToggleLayerPanel, isLayerPanelOpen, onOpenHelp }: Top
   const toggleHotspotMarkers = useBrainStore((state) => state.toggleHotspotMarkers);
   const selectedHotspotId = useBrainStore((state) => state.selectedHotspotId);
   const selectHotspot = useBrainStore((state) => state.selectHotspot);
+  const isQuizOpen = useBrainStore((state) => state.isQuizOpen);
+  const setIsQuizOpen = useBrainStore((state) => state.setIsQuizOpen);
+  const isSearchOpen = useBrainStore((state) => state.isSearchOpen);
+  const setIsSearchOpen = useBrainStore((state) => state.setIsSearchOpen);
+  const activeSystemFilter = useBrainStore((state) => state.activeSystemFilter);
+  const setActiveSystemFilter = useBrainStore((state) => state.setActiveSystemFilter);
+  const searchQuery = useBrainStore((state) => state.searchQuery);
+  const setSearchQuery = useBrainStore((state) => state.setSearchQuery);
 
   const [copiedLink, setCopiedLink] = useState(false);
 
@@ -125,6 +135,40 @@ export function TopNav({ onToggleLayerPanel, isLayerPanelOpen, onOpenHelp }: Top
 
       {/* Action Toolbar */}
       <div className="flex items-center gap-1.5 pointer-events-auto" role="toolbar" aria-label="Herramientas del visor 3D">
+        {/* Search Modal Trigger (Lupa) */}
+        <button
+          onClick={() => setIsSearchOpen(true)}
+          className={`px-3 py-2 rounded-xl border transition-all glass-panel flex items-center gap-2 focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none ${
+            isSearchOpen || activeSystemFilter !== 'all' || searchQuery
+              ? 'text-cyan-300 border-cyan-500/50 bg-cyan-950/40 shadow-lg shadow-cyan-950/30'
+              : 'text-slate-300 border-slate-800 hover:border-cyan-500/50 hover:text-white'
+          }`}
+          aria-label="Buscar estructuras neuroanatómicas (⌘K)"
+          title="Buscar estructura o patología [⌘K / Ctrl+K]"
+        >
+          <Search className="w-4 h-4 text-cyan-400" />
+          <span className="text-xs font-semibold hidden md:inline">
+            {activeSystemFilter !== 'all' ? activeSystemFilter : 'Buscar'}
+          </span>
+          {activeSystemFilter !== 'all' && (
+            <span
+              onClick={(e) => {
+                e.stopPropagation();
+                setActiveSystemFilter('all');
+                setSearchQuery('');
+              }}
+              className="p-0.5 rounded hover:bg-cyan-900/50 text-cyan-400 ml-0.5"
+              title="Limpiar filtro"
+              role="button"
+              aria-label="Limpiar filtro de sistema"
+            >
+              <X className="w-3 h-3" />
+            </span>
+          )}
+          <kbd className="hidden sm:inline text-[10px] px-1.5 py-0.2 rounded bg-slate-800/90 border border-slate-700/60 text-slate-400 font-mono">
+            ⌘K
+          </kbd>
+        </button>
         {/* Share View Link */}
         <button
           onClick={handleCopyShareLink}
@@ -184,6 +228,21 @@ export function TopNav({ onToggleLayerPanel, isLayerPanelOpen, onOpenHelp }: Top
           title={wireframe ? 'Desactivar malla wireframe' : 'Modo malla holográfica'}
         >
           <Box className="w-4 h-4" />
+        </button>
+
+        {/* Study & Quiz Mode */}
+        <button
+          onClick={() => setIsQuizOpen(!isQuizOpen)}
+          className={`p-2.5 rounded-xl border transition-all glass-panel focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none flex items-center gap-1.5 ${
+            isQuizOpen
+              ? 'text-emerald-300 border-emerald-500/50 bg-emerald-950/40 shadow-lg shadow-emerald-950/40'
+              : 'text-slate-400 border-slate-800 hover:text-emerald-400 hover:border-emerald-500/40'
+          }`}
+          aria-label={isQuizOpen ? 'Cerrar modo estudio y quiz' : 'Abrir modo estudio y quiz neuroanatómico'}
+          title="Modo Estudio & Quiz Clínico 3D"
+        >
+          <GraduationCap className="w-4 h-4 text-emerald-400" />
+          <span className="text-xs font-semibold hidden md:inline text-emerald-300">Quiz</span>
         </button>
 
         {/* Capture Snapshot */}

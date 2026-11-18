@@ -33,6 +33,10 @@ venv/
 __pycache__/
 *.py[cod]
 
+# Keep only the original Blender project
+Blender/*
+!Blender/Cerebro.blend
+
 # Blender backups and autosaves
 *.blend1
 *.blend2

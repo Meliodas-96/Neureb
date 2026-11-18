@@ -1,12 +1,12 @@
 import { create } from 'zustand';
-import { AnatomicalLayerId, LayerGroup, CameraPreset } from '@/types/brain';
+import { PrimaryLayerId, LayerGroup, CameraPreset } from '@/types/brain';
 import { ANATOMICAL_LAYERS } from '@/data/hotspots';
 
 interface BrainState {
   // Layer visibility
-  layers: Record<AnatomicalLayerId, boolean>;
-  toggleLayer: (id: AnatomicalLayerId) => void;
-  setLayer: (id: AnatomicalLayerId, visible: boolean) => void;
+  layers: Record<PrimaryLayerId, boolean>;
+  toggleLayer: (id: PrimaryLayerId) => void;
+  setLayer: (id: PrimaryLayerId, visible: boolean) => void;
   setLayerGroup: (group: LayerGroup, visible: boolean) => void;
   isolateGroup: (group: LayerGroup) => void;
   showAllLayers: () => void;
@@ -36,11 +36,31 @@ interface BrainState {
   wireframe: boolean;
   toggleWireframe: () => void;
 
+  // System filters & Search
+  activeSystemFilter: string;
+  setActiveSystemFilter: (filter: string) => void;
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
+  isSearchOpen: boolean;
+  setIsSearchOpen: (open: boolean) => void;
+
+  // Cross-section clipping planes
+  clippingAxis: 'none' | 'sagittal' | 'coronal' | 'axial';
+  setClippingAxis: (axis: 'none' | 'sagittal' | 'coronal' | 'axial') => void;
+  clippingOffset: number;
+  setClippingOffset: (offset: number) => void;
+  isClippingPanelOpen: boolean;
+  setIsClippingPanelOpen: (open: boolean) => void;
+
+  // Medical Quiz & Study Modal
+  isQuizOpen: boolean;
+  setIsQuizOpen: (open: boolean) => void;
+
   // Reset
   resetView: () => void;
 }
 
-const defaultLayers: Record<AnatomicalLayerId, boolean> = {
+const defaultLayers: Record<PrimaryLayerId, boolean> = {
   Cerebrum: true,
   Cerebellum: true,
   Brainstem: true,
@@ -78,7 +98,7 @@ export const useBrainStore = create<BrainState>((set, get) => ({
       const nextLayers = { ...defaultLayers };
       Object.keys(nextLayers).forEach((key) => {
         const item = ANATOMICAL_LAYERS.find((l) => l.id === key);
-        nextLayers[key as AnatomicalLayerId] = item ? item.category === group : false;
+        nextLayers[key as PrimaryLayerId] = item ? item.category === group : false;
       });
       return { layers: nextLayers };
     }),
@@ -89,7 +109,7 @@ export const useBrainStore = create<BrainState>((set, get) => ({
     set(() => {
       const nextLayers = { ...defaultLayers };
       Object.keys(nextLayers).forEach((k) => {
-        nextLayers[k as AnatomicalLayerId] = false;
+        nextLayers[k as PrimaryLayerId] = false;
       });
       return { layers: nextLayers };
     }),
@@ -139,6 +159,27 @@ export const useBrainStore = create<BrainState>((set, get) => ({
   wireframe: false,
   toggleWireframe: () => set((state) => ({ wireframe: !state.wireframe })),
 
+  activeSystemFilter: 'all',
+  setActiveSystemFilter: (filter) => set({ activeSystemFilter: filter }),
+
+  searchQuery: '',
+  setSearchQuery: (query) => set({ searchQuery: query }),
+
+  isSearchOpen: false,
+  setIsSearchOpen: (open) => set({ isSearchOpen: open }),
+
+  clippingAxis: 'none',
+  setClippingAxis: (axis) => set({ clippingAxis: axis }),
+
+  clippingOffset: 0,
+  setClippingOffset: (offset) => set({ clippingOffset: offset }),
+
+  isClippingPanelOpen: false,
+  setIsClippingPanelOpen: (open) => set({ isClippingPanelOpen: open }),
+
+  isQuizOpen: false,
+  setIsQuizOpen: (open) => set({ isQuizOpen: open }),
+
   resetView: () =>
     set({
       layers: { ...defaultLayers },
@@ -150,5 +191,12 @@ export const useBrainStore = create<BrainState>((set, get) => ({
       wireframe: false,
       showHotspotMarkers: true,
       focusIsolationType: 'ghost',
+      activeSystemFilter: 'all',
+      searchQuery: '',
+      isSearchOpen: false,
+      clippingAxis: 'none',
+      clippingOffset: 0,
+      isClippingPanelOpen: false,
+      isQuizOpen: false,
     }),
 }));

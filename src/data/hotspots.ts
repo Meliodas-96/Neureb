@@ -1,17 +1,128 @@
-import { HotspotData, LayerMetadata, CameraPresetConfig, AnatomicalLayerId } from '@/types/brain';
+import { HotspotData, LayerMetadata, CameraPresetConfig, AnatomicalLayerId, PrimaryLayerId, AnatomicalSystem } from '@/types/brain';
 
 // Centralized anatomical origin offset for the entire 3D scene (eliminates magic numbers)
 export const MODEL_ORIGIN_OFFSET = [0, -0.175, -0.081] as const;
 
+export const ANATOMICAL_SYSTEMS: { id: string; label: string; color: string }[] = [
+  { id: 'all', label: 'Todos', color: '#38bdf8' },
+  { id: 'Estructuras Profundas', label: 'Estructuras Profundas', color: '#f59e0b' },
+  { id: 'Pares Craneales', label: 'Pares Craneales (I-XII)', color: '#fef08a' },
+  { id: 'Lóbulos y Giros', label: 'Lóbulos Cerebrales', color: '#38bdf8' },
+  { id: 'Áreas de Brodmann', label: 'Áreas de Brodmann', color: '#10b981' },
+  { id: 'Tronco Encefálico', label: 'Tronco Encefálico', color: '#f97316' },
+  { id: 'Surcos y Cisuras', label: 'Surcos y Cisuras', color: '#a855f7' },
+  { id: 'Arterial', label: 'Red Arterial', color: '#dc2626' },
+  { id: 'Venoso', label: 'Red Venosa', color: '#1d4ed8' },
+  { id: 'Corteza y Parénquima', label: 'Cerebelo y Parénquima', color: '#a86858' },
+];
+
 export const HOTSPOT_LAYER_MAP: Record<string, AnatomicalLayerId> = {
+  // Vasos y Senos
   mca_bifurcation: 'Artery_Cerebral_Media',
   aca_acom: 'Artery_Cerebral_Anterior',
   basilar_apex: 'Artery_Vertebrobasilar',
-  optic_chiasm: 'Cranial_Nerves',
-  pons_brainstem: 'Brainstem',
-  cerebellum_hemisphere: 'Cerebellum',
-  temporal_lobe: 'Cerebrum',
   superficial_veins: 'Veins_Cerebral_Superficial',
+  pca_posterior_cerebral: 'Artery_Vertebrobasilar',
+  ica_supraclinoid: 'Artery_Cerebral_Media',
+  superior_sagittal_sinus: 'Sinus_Sagittal_Superior',
+  transverse_sigmoid_sinus: 'Sinus_Transverse_Sigmoid',
+
+  // Estructuras Subcorticales Profundas (Tálamo, Ventrículos, Cuerpo Calloso, etc.)
+  thalamus_diencephalon: 'Thalamus',
+  ventricular_system_lcr: 'Ventricular_System',
+  corpus_callosum_commissure: 'Corpus_Callosum',
+  hippocampus_archicortex: 'Hippocampus',
+  basal_ganglia_striatum: 'Basal_Ganglia',
+
+  // Pares Craneales (I-XII)
+  cn_i_olfactory: 'CN_I_Olfactory',
+  optic_chiasm: 'CN_II_Optic',
+  cn_iii_oculomotor: 'CN_III_Oculomotor',
+  cn_iv_trochlear: 'CN_IV_Trochlear',
+  cn_v_trigeminal: 'CN_V_Trigeminal',
+  cn_vi_abducens: 'CN_VI_Abducens',
+  cn_vii_facial: 'CN_VII_Facial',
+  cn_viii_vestibulocochlear: 'CN_VIII_Vestibulocochlear',
+  cn_ix_glossopharyngeal: 'CN_IX_Glossopharyngeal',
+  cn_x_vagus: 'CN_X_Vagus',
+  cn_xi_accessory: 'CN_XI_Accessory',
+  cn_xii_hypoglossal: 'CN_XII_Hypoglossal',
+
+  // Tronco y Cerebelo
+  mesencephalon_midbrain: 'Brainstem_Mesencephalon',
+  pons_brainstem: 'Brainstem_Pons',
+  medulla_oblongata: 'Brainstem_Medulla',
+  cerebellum_hemisphere: 'Cerebellum',
+
+  // Lóbulos Cerebrales
+  frontal_lobe_pfc: 'Lobe_Frontal',
+  parietal_lobe: 'Lobe_Parietal',
+  occipital_lobe: 'Lobe_Occipital',
+  temporal_lobe: 'Lobe_Temporal',
+  insula_lobe: 'Lobe_Insular',
+
+  // Surcos y cisuras
+  central_sulcus_rolando: 'Lobe_Frontal',
+  sylvian_fissure_lateral: 'Lobe_Temporal',
+  interhemispheric_fissure: 'Lobe_Frontal',
+  calcarine_sulcus: 'Lobe_Occipital',
+
+  // Brodmann
+  brodmann_4_motor: 'Lobe_Frontal',
+  brodmann_312_sensory: 'Lobe_Parietal',
+  brodmann_44_45_broca: 'Lobe_Frontal',
+  brodmann_22_wernicke: 'Lobe_Temporal',
+  brodmann_17_visual: 'Lobe_Occipital',
+  brodmann_41_42_auditory: 'Lobe_Temporal',
+};
+
+export const LAYER_PARENT_MAP: Record<string, PrimaryLayerId> = {
+  // Lóbulos -> Cerebrum
+  Lobe_Frontal: 'Cerebrum',
+  Lobe_Parietal: 'Cerebrum',
+  Lobe_Temporal: 'Cerebrum',
+  Lobe_Occipital: 'Cerebrum',
+  Lobe_Insular: 'Cerebrum',
+
+  // Tronco encefálico
+  Brainstem_Mesencephalon: 'Brainstem',
+  Brainstem_Pons: 'Brainstem',
+  Brainstem_Medulla: 'Brainstem',
+
+  // Pares craneales
+  CN_I_Olfactory: 'Cranial_Nerves',
+  CN_II_Optic: 'Cranial_Nerves',
+  CN_III_Oculomotor: 'Cranial_Nerves',
+  CN_IV_Trochlear: 'Cranial_Nerves',
+  CN_V_Trigeminal: 'Cranial_Nerves',
+  CN_VI_Abducens: 'Cranial_Nerves',
+  CN_VII_Facial: 'Cranial_Nerves',
+  CN_VIII_Vestibulocochlear: 'Cranial_Nerves',
+  CN_IX_Glossopharyngeal: 'Cranial_Nerves',
+  CN_X_Vagus: 'Cranial_Nerves',
+  CN_XI_Accessory: 'Cranial_Nerves',
+  CN_XII_Hypoglossal: 'Cranial_Nerves',
+
+  // Estructuras subcorticales
+  Corpus_Callosum: 'Cerebrum',
+  Ventricular_System: 'Cerebrum',
+  Thalamus: 'Brainstem',
+  Hippocampus: 'Cerebrum',
+  Basal_Ganglia: 'Cerebrum',
+
+  // Senos venosos durales
+  Sinus_Sagittal_Superior: 'Veins_Cerebral_Superficial',
+  Sinus_Transverse_Sigmoid: 'Veins_Cerebral_Superficial',
+
+  // Capas base
+  Cerebrum: 'Cerebrum',
+  Cerebellum: 'Cerebellum',
+  Brainstem: 'Brainstem',
+  Artery_Cerebral_Media: 'Artery_Cerebral_Media',
+  Artery_Cerebral_Anterior: 'Artery_Cerebral_Anterior',
+  Artery_Vertebrobasilar: 'Artery_Vertebrobasilar',
+  Veins_Cerebral_Superficial: 'Veins_Cerebral_Superficial',
+  Cranial_Nerves: 'Cranial_Nerves',
 };
 
 export const ANATOMICAL_LAYERS: LayerMetadata[] = [
@@ -90,6 +201,9 @@ export const ANATOMICAL_LAYERS: LayerMetadata[] = [
 ];
 
 export const HOTSPOTS_DATA: HotspotData[] = [
+  // ==========================================
+  // 1. RED ARTERIAL Y VENOSA
+  // ==========================================
   {
     id: 'mca_bifurcation',
     title: 'Arteria Cerebral Media (ACM - M1/M2)',
@@ -136,12 +250,185 @@ export const HOTSPOTS_DATA: HotspotData[] = [
     surgicalNotes: 'Abordajes de fosa posterior y ángulo pontocerebeloso; manipulación extremadamente delicada debido a las múltiples ramas perforantes pontinas.'
   },
   {
-    id: 'optic_chiasm',
-    title: 'Quiasma Óptico y Pares Craneales Anteriores',
-    latinTitle: 'Chiasma opticum (Nervus opticus - CN II)',
-    system: 'Tronco y Pares',
+    id: 'pca_posterior_cerebral',
+    title: 'Arteria Cerebral Posterior (PCA - P1/P2)',
+    latinTitle: 'Arteria cerebri posterior',
+    system: 'Arterial',
+    targetLayer: 'Artery_Vertebrobasilar',
+    categoryColor: '#b91c1c',
+    position: [-0.10, 0.04, 0.18],
+    cameraOffset: [-0.65, 0.15, 0.65],
+    summary: 'Rama terminal basilar que contornea el mesencéfalo para irrigar el lóbulo occipital y tálamo.',
+    anatomy: 'Nace en la bifurcación del tronco basilar, rodea los pedúnculos cerebrales sobre la cisterna ambiens y emite ramas tálamo-perforantes antes de dividirse en arterias calcarina y parietooccipital.',
+    function: 'Irrigación de la corteza visual primaria occipital, cara inferior del lóbulo temporal (giro fusiforme e hipocampo) y núcleos dorsomediales del tálamo.',
+    clinicalSignificance: 'Infarto calcarino produce hemianopsia homónima contralateral con respeto macular; afectación tálamo-perforante causa síndrome tálamo doloroso de Déjerine-Roussy.',
+    surgicalNotes: 'Referencia en abordajes subtemporales y occipitales transtentoriales a la región pineal.'
+  },
+  {
+    id: 'ica_supraclinoid',
+    title: 'Arteria Carótida Interna (Sifón y Segmento C4-C7)',
+    latinTitle: 'Arteria carotis interna (Pars cerebralis)',
+    system: 'Arterial',
+    targetLayer: 'Artery_Cerebral_Media',
+    categoryColor: '#ef4444',
+    position: [-0.08, 0.12, -0.08],
+    cameraOffset: [-0.55, 0.35, -0.55],
+    summary: 'Tronco arterial matriz de la circulación anterior que emerge tras atravesar el seno cavernoso.',
+    anatomy: 'Atraviesa el conducto carotídeo, penetra en el seno cavernoso (sifón carotídeo) y perfora la duramadre medial a la apófisis clinoides anterior, bifurcándose en ACA y ACM.',
+    function: 'Aporte de más del 80% del flujo sanguíneo cerebral total hacia los hemisferios anteriores.',
+    clinicalSignificance: 'Aneurismas paraclinoides y de la bifurcación carotídea; estenosis ateromatosa con riesgo de amaurosis fugaz (ceguera monocular transitoria) e ictus masivo.',
+    surgicalNotes: 'Clinoidectomía anterior extradural o intradural para liberar el anillo dural carotídeo en cirugía de aneurismas.'
+  },
+  {
+    id: 'superficial_veins',
+    title: 'Venas Corticales y Drenaje Anastomótico',
+    latinTitle: 'Venae superficiales (Trolard & Labbé)',
+    system: 'Venoso',
+    targetLayer: 'Veins_Cerebral_Superficial',
+    categoryColor: '#1d4ed8',
+    position: [-0.20, 0.36, 0.08],
+    cameraOffset: [-0.85, 0.95, 0.65],
+    summary: 'Red venosa cortical tributaria de los grandes colectores durales cerebrales.',
+    anatomy: 'Comprende la vena anastomótica superior de Trolard (que drena hacia el seno sagital superior) y la vena anastomótica inferior de Labbé (que drena hacia el seno transverso).',
+    function: 'Drenaje desoxigenado de la corteza y sustancia blanca subcortical hacia la circulación yugular interna.',
+    clinicalSignificance: 'La trombosis de senos venosos durales o de venas corticales causa hipertensión intracraneal, cefalea refractaria e infartos hemorrágicos venosos.',
+    surgicalNotes: 'Durante las craneotomías frontoparietales y temporales, la preservación de las venas puente y de Labbé es mandataria para evitar infarto venoso hemorrágico masivo e hinchazón cerebral intraoperatoria.'
+  },
+  {
+    id: 'superior_sagittal_sinus',
+    title: 'Seno Sagital Superior y Vértice Dural',
+    latinTitle: 'Sinus sagittalis superior',
+    system: 'Venoso',
+    targetLayer: 'Veins_Cerebral_Superficial',
+    categoryColor: '#1d4ed8',
+    position: [0.0, 0.58, 0.10],
+    cameraOffset: [0.0, 1.25, 0.35],
+    summary: 'Gran seno venoso dural longitudinal situado en el borde adherido de la hoz del cerebro.',
+    anatomy: 'Discurre desde la crista galli hasta la protuberancia occipital interna (torcula de Herófilo). Recibe las venas puente frontoparietales y contiene las vellosidades aracnoideas de Pacchioni.',
+    function: 'Reabsorción del líquido cefalorraquídeo (LCR) hacia el torrente sanguíneo venoso y colector principal de la convexidad hemisférica.',
+    clinicalSignificance: 'Trombosis del seno sagital superior (signo del delta vacío en TAC/RM contrastada) asociada a trombofilias, embarazo y deshidratación, con hipertensión endocraneal severa.',
+    surgicalNotes: 'Estructura en riesgo máximo durante craneotomías parasagitales; su oclusión en tercio medio o posterior provoca infarto venoso bilateral catastrófico.'
+  },
+  {
+    id: 'transverse_sigmoid_sinus',
+    title: 'Seno Transverso y Seno Sigmoideo',
+    latinTitle: 'Sinus transversus & Sinus sigmoideus',
+    system: 'Venoso',
+    targetLayer: 'Veins_Cerebral_Superficial',
+    categoryColor: '#1d4ed8',
+    position: [-0.26, -0.08, 0.38],
+    cameraOffset: [-0.95, -0.15, 0.95],
+    summary: 'Conductos colectores venosos durales de la fosa posterior que conducen la sangre hacia la vena yugular.',
+    anatomy: 'El seno transverso discurre horizontalmente a lo largo de la inserción de la tienda del cerebelo hasta la base del peñasco temporal, donde se curva en forma de "S" como seno sigmoideo para desembocar en el foramen yugular.',
+    function: 'Drenaje venoso de los hemisferios cerebrales posteriores, cerebelo y tronco del encéfalo.',
+    clinicalSignificance: 'Trombosis venosa fosa posterior y mastoiditis complicada con tromboflebitis séptica del seno sigmoideo (signo de Griesinger).',
+    surgicalNotes: 'Límite anterior y superior crítico en la craneotomía retrosigmoidea para abordajes al ángulo pontocerebeloso.'
+  },
+
+  // ==========================================
+  // 1.1 ESTRUCTURAS SUBCORTICALES PROFUNDAS
+  // ==========================================
+  {
+    id: 'thalamus_diencephalon',
+    title: 'Tálamo (Núcleos Talámicos / Ovoides Diencefálicos)',
+    latinTitle: 'Thalamus dorsalis [Diencephalon]',
+    system: 'Estructuras Profundas',
+    targetLayer: 'Thalamus',
+    categoryColor: '#f59e0b',
+    position: [0.035, 0.235, 0.095],
+    cameraOffset: [0.45, 0.25, 0.65],
+    summary: 'Gran estación nuclear ovoide de relevo sensorial y motor; dos masas simétricas a ambos lados del tercer ventrículo.',
+    anatomy: 'Estructura par con morfología ovoidea (los dos "huevos" diencefálicos) constituida por múltiples núcleos (VPL, VPM, pulvinar, cuerpos geniculados lateral y medial). Forma la pared lateral del tercer ventrículo y el suelo del ventrículo lateral.',
+    function: 'Estación de procesamiento y relevo obligado de todas las vías sensoriales conscientes (táctil, visual, auditiva, gustativa, excepto el olfato) hacia la corteza; modulación de la vigilia, el ciclo sueño-vigilia y la conciencia (SARA).',
+    clinicalSignificance: 'Infartos talámicos producen el Síndrome de Déjerine-Roussy (dolor talámico central neuropático refractario, hemianestesia contralateral y alodinia); lesiones mediales causan mutismo acinético o coma.',
+    surgicalNotes: 'Diana neuroquirúrgica para talamotomía y estimulación cerebral profunda (DBS) en temblor esencial incapacitante y Enfermedad de Parkinson (núcleo ventral intermedio VIM).'
+  },
+  {
+    id: 'ventricular_system_lcr',
+    title: 'Sistema Ventricular y Circulación de LCR',
+    latinTitle: 'Systema ventriculare & Liquor cerebrospinalis',
+    system: 'Estructuras Profundas',
+    targetLayer: 'Ventricular_System',
+    categoryColor: '#38bdf8',
+    position: [0.000, 0.200, 0.058],
+    cameraOffset: [0.0, 0.65, 0.85],
+    summary: 'Red de cavidades interconectadas llenas de líquido cefalorraquídeo que amortigua y nutre el encéfalo.',
+    anatomy: 'Consta de dos ventrículos laterales (astas anterior, posterior e inferior), tercer ventrículo medial comunicado por los agujeros de Monro, acueducto de Silvio mesencefálico y cuarto ventrículo en fosa posterior.',
+    function: 'Producción de LCR en los plexos coroideos (~500 ml/día), protección contra fuerzas mecánicas (flotabilidad que reduce el peso del encéfalo de 1500g a 50g) y eliminación de metabolitos cerebrales.',
+    clinicalSignificance: 'Hidrocefalia obstructiva por estenosis del acueducto de Silvio; síndrome de Hakim-Adams en hidrocefalia normotensiva (tríada: ataxia de la marcha, incontinencia urinaria y demencia).',
+    surgicalNotes: 'Punto de Kocher frontal para ventriculostomía externa; abordaje neuroendoscópico para ventriculostomía del tercer ventrículo (ETV).'
+  },
+  {
+    id: 'corpus_callosum_commissure',
+    title: 'Cuerpo Calloso (Comisura Interhemisférica)',
+    latinTitle: 'Corpus callosum',
+    system: 'Estructuras Profundas',
+    targetLayer: 'Corpus_Callosum',
+    categoryColor: '#fef08a',
+    position: [0.000, 0.330, 0.024],
+    cameraOffset: [0.0, 0.75, 0.45],
+    summary: 'La mayor comisura de sustancia blanca del encéfalo humano, puente de unión interhemisférico.',
+    anatomy: 'Arco masivo con más de 200 millones de axones mielinizados situado en el fondo de la cisura longitudinal. Se divide en pico (rostrum), rodilla (genu), cuerpo (truncus) y rodete (splenium).',
+    function: 'Conexión, sincronización y transferencia bidireccional de información motora, sensorial y cognitiva entre ambos hemisferios cerebrales.',
+    clinicalSignificance: 'Síndrome de desconexión callosa (apraxia ideomotora de la mano izquierda, anomia táctil izquierda y agrafia unilateral); glioblastomas en alas de mariposa.',
+    surgicalNotes: 'Callosotomía quirúrgica para el control de crisis epilépticas atónicas refractarias (drop attacks); abordaje transcalloso al tercer ventrículo.'
+  },
+  {
+    id: 'hippocampus_archicortex',
+    title: 'Hipocampo y Formación Hipocampal',
+    latinTitle: 'Hippocampus (Archicortex)',
+    system: 'Estructuras Profundas',
+    targetLayer: 'Hippocampus',
+    categoryColor: '#fb7185',
+    position: [-0.065, 0.170, 0.066],
+    cameraOffset: [-0.55, 0.25, 0.55],
+    summary: 'Estructura en forma de caballito de mar en la cara medial del lóbulo temporal; centro maestro de la memoria.',
+    anatomy: 'Constituido por el asta de Ammón (sectores CA1 a CA4), el giro dentado y el subículo. Conectado al hipotálamo y cuerpos mamilares a través del fórnix.',
+    function: 'Consolidación y transferencia de la memoria episódica reciente a memoria a largo plazo, navegación visuoespacial (células de lugar) y orientación.',
+    clinicalSignificance: 'Región primariamente afectada en la Enfermedad de Alzheimer (amnesia anterógrada); diana de esclerosis temporal mesial causante de epilepsia refractaria.',
+    surgicalNotes: 'Amigdalohipocampectomía selectiva mediante abordaje transsilviano o transcortical para resección de foco epileptógeno.'
+  },
+  {
+    id: 'basal_ganglia_striatum',
+    title: 'Ganglios Basales (Cuerpo Estriado y Núcleos Grises)',
+    latinTitle: 'Nuclei basales (Corpus striatum)',
+    system: 'Estructuras Profundas',
+    targetLayer: 'Basal_Ganglia',
+    categoryColor: '#eab308',
+    position: [-0.055, 0.260, -0.053],
+    cameraOffset: [-0.55, 0.45, -0.45],
+    summary: 'Complejo nuclear subcortical que modula y refina los programas de movimiento voluntario.',
+    anatomy: 'Comprende el núcleo caudado, el putamen y el globo pálido (núcleo lenticular), junto al núcleo subtalámico de Luys y la sustancia negra mesencefálica.',
+    function: 'Iniciación y terminación de actos motores voluntarios, regulación del tono postural y automatización de habilidades motoras complejas.',
+    clinicalSignificance: 'Enfermedad de Parkinson por depleción de dopamina en la vía nigroestriatal; Corea de Huntington por degeneración del núcleo caudado.',
+    surgicalNotes: 'Estimulación cerebral profunda (DBS) guiada por microrregistro intraoperatorio en el núcleo subtalámico (STN) o globo pálido interno (GPi).'
+  },
+
+  // ==========================================
+  // 2. PARES CRANEALES (CN I - XII)
+  // ==========================================
+  {
+    id: 'cn_i_olfactory',
+    title: 'Nervio Olfatorio (Par Craneal I)',
+    latinTitle: 'Nervus olfactorius [CN I]',
+    system: 'Pares Craneales',
     targetLayer: 'Cranial_Nerves',
-    categoryColor: '#fffbeb',
+    categoryColor: '#fef08a',
+    position: [-0.05, 0.14, -0.22],
+    cameraOffset: [-0.35, -0.15, -0.65],
+    summary: 'Primer par craneal sensorial especial encargado de la olfacción; bulbo y cintilla sobre la lámina cribosa.',
+    anatomy: 'Se origina en el epitelio olfatorio nasal, atraviesa los orificios de la lámina cribosa del etmoides y hace sinapsis en el bulbo olfatorio, prolongándose como tracto olfatorio en el surco olfatorio del lóbulo frontal.',
+    function: 'Transmisión de estímulos odoríferos al córtex piriforme, amígdala y corteza entorrinal sin relevo talámico previo.',
+    clinicalSignificance: 'Anosmia tras traumatismos craneoencefálicos anteriores por cizallamiento en la lámina cribosa o compresión tumoral (meningioma del surco olfatorio / síndrome de Foster Kennedy).',
+    surgicalNotes: 'Abordaje subfrontal; riesgo de desgarro de las cintillas olfatorias al retraer el lóbulo frontal.'
+  },
+  {
+    id: 'optic_chiasm',
+    title: 'Quiasma Óptico y Nervio Óptico (CN II)',
+    latinTitle: 'Chiasma opticum [Nervus opticus - CN II]',
+    system: 'Pares Craneales',
+    targetLayer: 'Cranial_Nerves',
+    categoryColor: '#fef08a',
     position: [0.0, 0.08, -0.12],
     cameraOffset: [0.0, 0.45, -1.05],
     summary: 'Cruce parcial de las fibras nerviosas retinianas nasales en la base del hipotálamo.',
@@ -151,12 +438,181 @@ export const HOTSPOTS_DATA: HotspotData[] = [
     surgicalNotes: 'Corredor anatómico clave en abordajes endoscópicos transesfenoidales endonasales a la región selar y paraselar.'
   },
   {
+    id: 'cn_iii_oculomotor',
+    title: 'Nervio Oculomotor / Motor Ocular Común (CN III)',
+    latinTitle: 'Nervus oculomotorius [CN III]',
+    system: 'Pares Craneales',
+    targetLayer: 'Brainstem',
+    categoryColor: '#fef08a',
+    position: [-0.03, 0.01, 0.10],
+    cameraOffset: [-0.25, 0.15, -0.45],
+    summary: 'Inervación motora ocular intrínseca y extrínseca; emerge en la fosa interpeduncular mesencefálica.',
+    anatomy: 'Emerge en el surco medial del pedúnculo cerebral (fosa interpeduncular), discurre entre la arteria cerebral posterior (PCA) y la arteria cerebelosa superior (SCA), atraviesa la pared lateral del seno cavernoso y entra por la hendidura esfenoidal.',
+    function: 'Motilidad ocular extrínseca (rectos superior, inferior, medial y oblicuo menor; elevador del párpado) y parasimpático pupilar (esfínter pupilar y acomodación).',
+    clinicalSignificance: 'Parálisis del III par con midriasis arreactiva y ptosis (signo clásico de alarma de hernia uncal o aneurisma de la arteria comunicante posterior PCom).',
+    surgicalNotes: 'Vulnerable a compresión y tracción durante abordajes al tentorio y fosa interpeduncular.'
+  },
+  {
+    id: 'cn_iv_trochlear',
+    title: 'Nervio Troclear o Patético (CN IV)',
+    latinTitle: 'Nervus trochlearis [CN IV]',
+    system: 'Pares Craneales',
+    targetLayer: 'Brainstem',
+    categoryColor: '#fef08a',
+    position: [-0.08, 0.00, 0.16],
+    cameraOffset: [-0.45, 0.05, 0.35],
+    summary: 'Único nervio craneal con emergencia dorsal en el tronco; inerva el músculo oblicuo superior.',
+    anatomy: 'Emerge de la cara posterior del mesencéfalo, justo por debajo de los colículos inferiores, decusa dorsalmente y contornea los pedúnculos cerebrales hacia la base del cráneo.',
+    function: 'Inerva el músculo oblicuo superior, produciendo intorsión, depresión y abducción del globo ocular.',
+    clinicalSignificance: 'Diplopía vertical que empeora al mirar hacia abajo y adentro (ej. bajar escaleras o leer). Compensación inclinando la cabeza hacia el hombro opuesto.',
+    surgicalNotes: 'Trayecto intracraneal más largo de todos los pares craneales; riesgo elevado en abordajes subtemporales y transtentoriales.'
+  },
+  {
+    id: 'cn_v_trigeminal',
+    title: 'Nervio Trigémino (CN V)',
+    latinTitle: 'Nervus trigeminus [CN V]',
+    system: 'Pares Craneales',
+    targetLayer: 'Brainstem',
+    categoryColor: '#fef08a',
+    position: [-0.08, -0.05, 0.14],
+    cameraOffset: [-0.55, 0.15, 0.35],
+    summary: 'Principal nervio sensitivo craneofacial y motor masticatorio; emerge en la cara anterolateral del puente.',
+    anatomy: 'Emerge con dos raíces (sensitiva gruesa y motora delgada) en la unión de la cara ventral y los pedúnculos cerebelosos medios del puente. Se dirige al cavum de Meckel donde se sitúa el ganglio de Gasser.',
+    function: 'Sensibilidad táctil, térmica y dolorosa de cara, córnea, dientes y 2/3 anteriores de lengua; motilidad de músculos masticadores.',
+    clinicalSignificance: 'Neuralgia del trigémino (dolor lancinante paroxístico invalidante, frecuentemente por compresión neurovascular en la zona de entrada radicular por la arteria cerebelosa superior AICA/SCA).',
+    surgicalNotes: 'Objetivo de descompresión microvascular de Janetta mediante craneotomía retrosigmoidea.'
+  },
+  {
+    id: 'cn_vi_abducens',
+    title: 'Nervio Abducens / Motor Ocular Externo (CN VI)',
+    latinTitle: 'Nervus abducens [CN VI]',
+    system: 'Pares Craneales',
+    targetLayer: 'Brainstem',
+    categoryColor: '#fef08a',
+    position: [-0.02, -0.11, 0.18],
+    cameraOffset: [-0.25, 0.05, -0.35],
+    summary: 'Control de la abducción ocular; emerge en el surco bulbopontino sobre las pirámides bulbares.',
+    anatomy: 'Emerge medialmente en el surco bulbopontino, asciende por el clivus en el canal de Dorello, entra en el seno cavernoso adyacente a la carótida interna y accede a la órbita.',
+    function: 'Inervación exclusiva del músculo recto lateral ocular.',
+    clinicalSignificance: 'Falso signo localizador de hipertensión intracraneal (por estiramiento en el ligamento petroesfenoidal de Grüber) causando diplopía horizontal y estrabismo convergente.',
+    surgicalNotes: 'Estructura en riesgo en abordajes clivales y transesfenoidales extendidos.'
+  },
+  {
+    id: 'cn_vii_facial',
+    title: 'Nervio Facial (CN VII)',
+    latinTitle: 'Nervus facialis [CN VII]',
+    system: 'Pares Craneales',
+    targetLayer: 'Brainstem',
+    categoryColor: '#fef08a',
+    position: [-0.09, -0.12, 0.20],
+    cameraOffset: [-0.55, 0.05, 0.45],
+    summary: 'Control motor de la mímica facial, gusto de 2/3 anteriores de la lengua y secreción lagrimal/salival.',
+    anatomy: 'Emerge en la fosita supraolivar del ángulo pontocerebeloso junto al nervio intermediario de Wrisberg. Ingresa al conducto auditivo interno (CAI).',
+    function: 'Expresión facial motora completa, gusto anterior, glándulas submandibulares, sublinguales y lagrimales.',
+    clinicalSignificance: 'Parálisis facial periférica (parálisis de Bell: signo de Bell, caída de comisura bucal e imposibilidad de cerrar el ojo) vs parálisis facial central con respeto de la musculatura frontal.',
+    surgicalNotes: 'Estructura crítica en la resección de neurinomas del acústico; monitorización neurofisiológica intraoperatoria indispensable para preservar la mímica.'
+  },
+  {
+    id: 'cn_viii_vestibulocochlear',
+    title: 'Nervio Vestibulococlear (CN VIII)',
+    latinTitle: 'Nervus vestibulocochlearis [CN VIII]',
+    system: 'Pares Craneales',
+    targetLayer: 'Brainstem',
+    categoryColor: '#fef08a',
+    position: [-0.12, -0.12, 0.22],
+    cameraOffset: [-0.65, 0.05, 0.55],
+    summary: 'Audición y equilibrio vestibular; emerge en el ángulo pontocerebeloso lateral al VII par.',
+    anatomy: 'Comprende la división coclear y las divisiones vestibulares superior e inferior. Penetra al CAI junto al nervio facial.',
+    function: 'Transmisión sensorial del equilibrio postural, aceleraciones angulares/lineales y audición.',
+    clinicalSignificance: 'Hipoacusia neurosensorial progresiva, acúfenos y vértigo por schwannoma vestibular (neurinoma del acústico).',
+    surgicalNotes: 'Abordaje retrosigmoideo o translaberíntico con potenciales auditivos evocados de tronco (PEAT).'
+  },
+  {
+    id: 'cn_ix_glossopharyngeal',
+    title: 'Nervio Glosofaríngeo (CN IX)',
+    latinTitle: 'Nervus glossopharyngeus [CN IX]',
+    system: 'Pares Craneales',
+    targetLayer: 'Brainstem',
+    categoryColor: '#fef08a',
+    position: [-0.07, -0.16, 0.22],
+    cameraOffset: [-0.45, -0.05, 0.55],
+    summary: 'Sensibilidad orofaríngea, reflejo nauseoso y barorreceptores del seno carotídeo; surco retroolivar.',
+    anatomy: 'Serie de raicillas en la porción más rostral del surco retroolivar (postolivar) del bulbo raquídeo. Sale por el foramen yugular (agujero rasgado posterior).',
+    function: 'Gusto del 1/3 posterior de lengua, inervación del músculo estilofaríngeo, reflejo nauseoso eferente y aferencia de barorreceptores carotídeos.',
+    clinicalSignificance: 'Neuralgia del glosofaríngeo (dolor faríngeo desencadenado por la deglución); pérdida del reflejo nauseoso.',
+    surgicalNotes: 'Identificación obligatoria en cirugía del agujero yugular y tumores del glomus yugular.'
+  },
+  {
+    id: 'cn_x_vagus',
+    title: 'Nervio Vago / Neumogástrico (CN X)',
+    latinTitle: 'Nervus vagus [CN X]',
+    system: 'Pares Craneales',
+    targetLayer: 'Brainstem',
+    categoryColor: '#fef08a',
+    position: [-0.07, -0.19, 0.23],
+    cameraOffset: [-0.45, -0.10, 0.55],
+    summary: 'Principal nervio parasimpático visceral, inervación de cuerdas vocales y vísceras toracoabdominales.',
+    anatomy: 'Raicillas en el surco retroolivar entre el IX y el XI par. Atraviesa el foramen yugular y discurre por la vaina carotídea cervical.',
+    function: 'Control parasimpático del ritmo cardíaco, motilidad digestiva, inervación laríngea (nervios laríngeos recurrentes - fonación).',
+    clinicalSignificance: 'Disfonía (voz bitonal), disfagia, parálisis de cuerda vocal ipsilateral y caída del velo del paladar con desviación de la úvula hacia el lado sano.',
+    surgicalNotes: 'Riesgo de lesión en cirugía cervical alta, endarterectomía carotídea y tumores de la base del cráneo posterior.'
+  },
+  {
+    id: 'cn_xi_accessory',
+    title: 'Nervio Accesorio / Espinal (CN XI)',
+    latinTitle: 'Nervus accessorius [CN XI]',
+    system: 'Pares Craneales',
+    targetLayer: 'Brainstem',
+    categoryColor: '#fef08a',
+    position: [-0.06, -0.23, 0.24],
+    cameraOffset: [-0.45, -0.15, 0.55],
+    summary: 'Inervación motora del esternocleidomastoideo y trapecio; raíces espinales cervicales que ascienden al cráneo.',
+    anatomy: 'Se forma por raíces espinales de los segmentos C1-C5 que ascienden por el foramen magnum uniéndose a raicillas bulbares para salir por el foramen yugular.',
+    function: 'Rotación cefálica contralateral y elevación de los hombros (músculos ECM y trapecio).',
+    clinicalSignificance: 'Incapacidad para encoger el hombro y atrofia del trapecio (frecuente tras biopsias ganglionares en triángulo cervical posterior).',
+    surgicalNotes: 'Estructura superficial en abordajes cervicales laterales de cuello y base del cráneo.'
+  },
+  {
+    id: 'cn_xii_hypoglossal',
+    title: 'Nervio Hipogloso (CN XII)',
+    latinTitle: 'Nervus hypoglossus [CN XII]',
+    system: 'Pares Craneales',
+    targetLayer: 'Brainstem',
+    categoryColor: '#fef08a',
+    position: [-0.03, -0.18, 0.20],
+    cameraOffset: [-0.35, -0.10, 0.40],
+    summary: 'Motilidad voluntaria lingual completa; emerge en el surco preolivar del bulbo raquídeo.',
+    anatomy: 'Emerge como serie de raicillas en el surco preolivar (entre las pirámides bulbares y la oliva). Abandona el cráneo a través del canal del hipogloso.',
+    function: 'Inerva todos los músculos intrínsecos y extrínsecos de la lengua (excepto el palatogloso).',
+    clinicalSignificance: 'Desviación de la lengua hacia el lado afecto (por acción del geniogloso sano contralateral) con fasciculaciones y atrofia lingual (signo de motoneurona inferior en ELA).',
+    surgicalNotes: 'Referencia anatómica clave en abordajes al foramen magnum, abordajes faríngeos y transcondíleos (far-lateral).'
+  },
+
+  // ==========================================
+  // 3. TRONCO ENCEFÁLICO Y CEREBELO
+  // ==========================================
+  {
+    id: 'mesencephalon_midbrain',
+    title: 'Mesencéfalo (Pedúnculos y Fosa Interpeduncular)',
+    latinTitle: 'Mesencephalon',
+    system: 'Tronco Encefálico',
+    targetLayer: 'Brainstem',
+    categoryColor: '#f97316',
+    position: [0.0, 0.02, 0.12],
+    cameraOffset: [0.0, 0.25, -0.55],
+    summary: 'Porción más rostral del tronco encefálico; contiene la sustancia negra, colículos y acueducto de Silvio.',
+    anatomy: 'Une el puente con el diencéfalo. Ventralmente presenta los pedúnculos cerebrales; dorsalmente la lámina cuadrigémina (colículos superiores e inferiores) y centralmente el acueducto cerebral.',
+    function: 'Vía motora piramidal principal, modulación extrapiramidal del movimiento (dopamina en sustancia negra pars compacta) y reflejos auditivos/visuales.',
+    clinicalSignificance: 'Pérdida de neuronas dopaminérgicas en la sustancia negra genera la Enfermedad de Parkinson (temblor de reposo, rigidez y bradicinesia). Síndromes alternos (Weber, Benedict).',
+    surgicalNotes: 'Abordajes a la cisterna interpeduncular y acueducto; zona diana de estimulación cerebral profunda (DBS).'
+  },
+  {
     id: 'pons_brainstem',
     title: 'Protuberancia Anular (Pons de Varolio)',
     latinTitle: 'Pons (Truncus encephalicus)',
-    system: 'Tronco y Pares',
+    system: 'Tronco Encefálico',
     targetLayer: 'Brainstem',
-    categoryColor: '#ecd8c3',
+    categoryColor: '#f97316',
     position: [0.0, -0.06, 0.16],
     cameraOffset: [0.75, -0.15, 0.95],
     summary: 'Prominencia media ventral del tronco del encéfalo, puente de conexión entre corteza y cerebelo.',
@@ -164,6 +620,21 @@ export const HOTSPOTS_DATA: HotspotData[] = [
     function: 'Contiene los núcleos de los pares craneales V, VI, VII y VIII; centros moduladores respiratorios (neumotáxico y apnéustico) y las vías corticoespinales descendentes.',
     clinicalSignificance: 'Las hemorragias pontinas hipertensivas cursan con coma repentino, pupilas puntiformes y tetraplejía. En desmielinización por corrección rápida de hiponatremia ocurre mielinólisis central pontina.',
     surgicalNotes: 'Zona quirúrgica de alta elocuencia; las lesiones intrínsecas requieren mapeo neurofisiológico intraoperatorio riguroso.'
+  },
+  {
+    id: 'medulla_oblongata',
+    title: 'Bulbo Raquídeo / Médula Oblongada',
+    latinTitle: 'Medulla oblongata / Myelencephalon',
+    system: 'Tronco Encefálico',
+    targetLayer: 'Brainstem',
+    categoryColor: '#f97316',
+    position: [0.0, -0.19, 0.22],
+    cameraOffset: [0.0, -0.25, 0.65],
+    summary: 'Segmento caudal del tronco encefálico que alberga los centros vitales cardiorrespiratorios y la decusación motora.',
+    anatomy: 'Continuación caudal del puente en el surco bulbopontino hasta el foramen magnum. Cara ventral dominada por las pirámides bulbares, olivas inferiores y surcos pre/retroolivares.',
+    function: 'Control automático de la respiración (centro neumotáxico), regulación de la presión arterial, deglución, vómito y tos.',
+    clinicalSignificance: 'Infarto bulbar lateral o Síndrome de Wallenberg (por oclusión de la PICA/arteria vertebral: dismetría, ataxia, síndrome de Horner ipsilateral y termoalgesia cruzada). El enclavamiento amigdalino comprime el bulbo causando paro respiratorio.',
+    surgicalNotes: 'Abordaje del foramen magnum (far-lateral / suboccipital de la línea media) con máxima protección del tronco vital.'
   },
   {
     id: 'cerebellum_hemisphere',
@@ -180,13 +651,47 @@ export const HOTSPOTS_DATA: HotspotData[] = [
     clinicalSignificance: 'Síndromes cerebelosos hemisféricos cursan con dismetría, disdiadococinesia, ataxia ipsilateral y temblor intencional. Malformación de Chiari I por descenso tonsilar por debajo del foramen magnum.',
     surgicalNotes: 'Vía de abordaje suboccipital retrosigmoideo para tumores del ángulo pontocerebeloso (schwannomas vestibulares).'
   },
+
+  // ==========================================
+  // 4. LÓBULOS CEREBRALES
+  // ==========================================
+  {
+    id: 'frontal_lobe_pfc',
+    title: 'Lóbulo Frontal y Corteza Prefrontal',
+    latinTitle: 'Lobus frontalis & Cortex praefrontalis',
+    system: 'Lóbulos y Giros',
+    targetLayer: 'Cerebrum',
+    categoryColor: '#38bdf8',
+    position: [-0.18, 0.38, -0.28],
+    cameraOffset: [-0.85, 0.55, -0.95],
+    summary: 'Polo anterior encefálico responsable de funciones ejecutivas, personalidad, juicio y planificación motora.',
+    anatomy: 'Comprende el polo frontal, giros frontales superior (F1), medio (F2) e inferior (F3) y la corteza orbitaria/medial.',
+    function: 'Toma de decisiones, memoria de trabajo, metacognición, inhibición conductual y control de la conducta social.',
+    clinicalSignificance: 'Síndrome frontal (apatía o desinhibición conductual, cambios de personalidad como en el caso histórico de Phineas Gage, pérdida del juicio ético y marcha magnética).',
+    surgicalNotes: 'Abordajes bifrontales y frontotemporales; respeto de la corteza periorbitaria y drenaje sagital.'
+  },
+  {
+    id: 'parietal_lobe',
+    title: 'Lóbulo Parietal y Giros Supramarginal/Angular',
+    latinTitle: 'Lobus parietalis',
+    system: 'Lóbulos y Giros',
+    targetLayer: 'Cerebrum',
+    categoryColor: '#38bdf8',
+    position: [-0.22, 0.48, 0.14],
+    cameraOffset: [-0.95, 0.65, 0.65],
+    summary: 'Integración multisensorial, orientación visuoespacial y procesamiento somestésico superior.',
+    anatomy: 'Delimitado por el surco central por delante y la línea parietooccipital por detrás. Dividido en lobulillos parietales superior e inferior (giro supramarginal y angular).',
+    function: 'Integración sensoriomotora, cálculo aritmético, esquema corporal y atención espacial.',
+    clinicalSignificance: 'Síndrome de Gerstmann (acalculia, agrafia, agnosia digital y desorientación derecha-izquierda) por lesión angular dominante; heminegligencia espacial contralateral en lesiones no dominantes.',
+    surgicalNotes: 'Mapeo cortical despierto en lobectomías parietales para preservar la integración lingüística y espacial.'
+  },
   {
     id: 'temporal_lobe',
     title: 'Lóbulo Temporal y Giro Parahipocampal',
     latinTitle: 'Lobus temporalis',
-    system: 'Corteza y Parénquima',
+    system: 'Lóbulos y Giros',
     targetLayer: 'Cerebrum',
-    categoryColor: '#d9a296',
+    categoryColor: '#38bdf8',
     position: [-0.30, 0.16, 0.05],
     cameraOffset: [-1.15, 0.35, 0.45],
     summary: 'Porción inferolateral del hemisferio cerebral que descansa sobre la fosa craneal media.',
@@ -196,19 +701,198 @@ export const HOTSPOTS_DATA: HotspotData[] = [
     surgicalNotes: 'Lobectomía temporal anteromedial y amigdalohipocampectomía selectiva guiada por neuronavegación 3D.'
   },
   {
-    id: 'superficial_veins',
-    title: 'Venas Corticales y Drenaje Anastomótico',
-    latinTitle: 'Venae superficiales (Trolard & Labbé)',
-    system: 'Venoso',
-    targetLayer: 'Veins_Cerebral_Superficial',
-    categoryColor: '#1d4ed8',
-    position: [-0.20, 0.36, 0.08],
-    cameraOffset: [-0.85, 0.95, 0.65],
-    summary: 'Red venosa cortical tributaria de los grandes colectores durales cerebrales.',
-    anatomy: 'Comprende la vena anastomótica superior de Trolard (que drena hacia el seno sagital superior) y la vena anastomótica inferior de Labbé (que drena hacia el seno transverso).',
-    function: 'Drenaje desoxigenado de la corteza y sustancia blanca subcortical hacia la circulación yugular interna.',
-    clinicalSignificance: 'La trombosis de senos venosos durales o de venas corticales causa hipertensión intracraneal, cefalea refractaria e infartos hemorrágicos venosos.',
-    surgicalNotes: 'Durante las craneotomías frontoparietales y temporales, la preservación de las venas puente y de Labbé es mandataria para evitar infarto venoso hemorrágico masivo e hinchazón cerebral intraoperatoria.'
+    id: 'occipital_lobe',
+    title: 'Lóbulo Occipital y Polo Visual',
+    latinTitle: 'Lobus occipitalis',
+    system: 'Lóbulos y Giros',
+    targetLayer: 'Cerebrum',
+    categoryColor: '#38bdf8',
+    position: [-0.14, 0.22, 0.46],
+    cameraOffset: [-0.65, 0.35, 1.15],
+    summary: 'Centro primario del procesamiento visual del encéfalo en la fosa posterior cerebral.',
+    anatomy: 'Polo posterior del hemisferio que descansa sobre la tienda del cerebelo (tentorio). Presenta los giros occipitales superior, medio e inferior.',
+    function: 'Recepción y análisis de estímulos visuales (forma, color, movimiento y profundidad binocular).',
+    clinicalSignificance: 'Hemianopsia homónima contralateral con o sin respeto macular; agnosias visuales complejas (prosopagnosia o incapacidad de reconocer rostros).',
+    surgicalNotes: 'Abordaje occipital transtentorial (de Poppen) para tumores de la región pineal.'
+  },
+  {
+    id: 'insula_lobe',
+    title: 'Lóbulo de la Ínsula (Corteza Insular)',
+    latinTitle: 'Insula / Lobus insularis',
+    system: 'Lóbulos y Giros',
+    targetLayer: 'Cerebrum',
+    categoryColor: '#38bdf8',
+    position: [-0.19, 0.20, -0.02],
+    cameraOffset: [-0.85, 0.25, 0.15],
+    summary: 'Corteza oculta en la profundidad de la cisura de Silvio; integración autonómica, gustativa y nociceptiva.',
+    anatomy: 'Recubierta por los opérculos frontal, parietal y temporal. Formada por tres giros cortos anteriores y dos giros largos posteriores rodeados por el surco circular de la ínsula.',
+    function: 'Procesamiento interoceptivo visceral, dolor, empatía, función autonómica cardíaca y adicciones (craving).',
+    clinicalSignificance: 'Gliomas insulares de difícil resección por su estrecha relación con las arterias lenticuloestriadas perforantes y la cápsula interna profunda.',
+    surgicalNotes: 'Abordaje transsilviano microquirúrgico con disección meticulosa de las ramas M2/M3 de la ACM.'
+  },
+
+  // ==========================================
+  // 5. SURCOS Y CISURAS
+  // ==========================================
+  {
+    id: 'central_sulcus_rolando',
+    title: 'Surco Central / Cisura de Rolando',
+    latinTitle: 'Sulcus centralis (Rolandi)',
+    system: 'Surcos y Cisuras',
+    targetLayer: 'Cerebrum',
+    categoryColor: '#a855f7',
+    position: [-0.22, 0.44, 0.02],
+    cameraOffset: [-0.95, 0.75, 0.25],
+    summary: 'Hito anatómico fundamental que divide el lóbulo frontal del parietal y el área motora de la sensitiva.',
+    anatomy: 'Surco profundo que nace en la cara medial hemisférica por encima del cíngulo y desciende oblicuamente hacia la cisura de Silvio sin llegar habitualmente a confluir con ella.',
+    function: 'Límite funcional estricto entre el giro precentral (motor primario M1) y el giro poscentral (sensitivo primario S1).',
+    clinicalSignificance: 'Punto de referencia neuroquirúrgico para evitar parálisis motora o pérdida sensorial permanente durante craneotomías.',
+    surgicalNotes: 'Localización intraoperatoria por inversión de fase del potencial evocado somatosensorial (PESS) o estimulación cortical directa.'
+  },
+  {
+    id: 'sylvian_fissure_lateral',
+    title: 'Surco Lateral / Cisura de Silvio',
+    latinTitle: 'Sulcus lateralis (Sylvii)',
+    system: 'Surcos y Cisuras',
+    targetLayer: 'Cerebrum',
+    categoryColor: '#a855f7',
+    position: [-0.28, 0.22, -0.08],
+    cameraOffset: [-1.05, 0.35, -0.25],
+    summary: 'Cisura más prominente de la superficie lateral hemisférica; principal autopista quirúrgica cerebral.',
+    anatomy: 'Comienza en la base cerebral como valle silviano y se ramifica en una rama anterior horizontal, una rama ascendente y una rama posterior larga que termina en el giro supramarginal.',
+    function: 'Aloja en su profundidad a la ínsula y a todo el complejo arterial de la arteria cerebral media (ramas M2 y M3).',
+    clinicalSignificance: 'Territorio de formación de fístulas durales y aneurismas de bifurcación de la ACM; entrada a lesiones insulares y mesiotemporales.',
+    surgicalNotes: 'La disección microquirúrgica de la cisura de Silvio es la maniobra central del abordaje pterional de Yasargil.'
+  },
+  {
+    id: 'interhemispheric_fissure',
+    title: 'Cisura Longitudinal / Interhemisférica',
+    latinTitle: 'Fissura longitudinalis cerebri',
+    system: 'Surcos y Cisuras',
+    targetLayer: 'Cerebrum',
+    categoryColor: '#a855f7',
+    position: [0.0, 0.54, 0.04],
+    cameraOffset: [0.0, 1.25, 0.05],
+    summary: 'Plano sagital medio que separa ambos hemisferios y aloja la hoz del cerebro y arterias pericallosas.',
+    anatomy: 'Hendidura profunda medial que se extiende desde la fosa craneal anterior hasta la protuberancia occipital interna, alcanzando en profundidad el cuerpo calloso.',
+    function: 'Permite la separación espacial de los hemisferios y el tránsito de las arterias cerebrales anteriores (complejo pericalloso A2-A3).',
+    clinicalSignificance: 'Vía de abordaje para tumores de la región pineal, del tercer ventrículo y aneurismas de la arteria comunicante anterior.',
+    surgicalNotes: 'Abordaje interhemisférico anterior o posterior con preservación obligatoria de las venas parasagitales puente.'
+  },
+  {
+    id: 'calcarine_sulcus',
+    title: 'Cisura Calcarina (Corteza Visual)',
+    latinTitle: 'Sulcus calcarinus',
+    system: 'Surcos y Cisuras',
+    targetLayer: 'Cerebrum',
+    categoryColor: '#a855f7',
+    position: [-0.04, 0.16, 0.44],
+    cameraOffset: [-0.45, 0.25, 0.95],
+    summary: 'Surco medial del lóbulo occipital cuyos labios superior e inferior albergan la corteza visual estriada V1.',
+    anatomy: 'Nace debajo del rodete del cuerpo calloso y se dirige hacia el polo occipital. Su labio superior corresponde a la cuña (cuneus) y el inferior al giro lingual.',
+    function: 'Mapeo retinotópico de los campos visuales superior e inferior contralaterales.',
+    clinicalSignificance: 'Lesión aislada del labio superior produce cuadrantanopsia inferior contralateral; lesión del labio inferior genera cuadrantanopsia superior contralateral.',
+    surgicalNotes: 'Abordaje occipital interhemisférico; máximo cuidado con las ramas de la arteria calcarina.'
+  },
+
+  // ==========================================
+  // 6. ÁREAS DE BRODMANN
+  // ==========================================
+  {
+    id: 'brodmann_4_motor',
+    title: 'Corteza Motora Primaria (M1 / Área 4 de Brodmann)',
+    latinTitle: 'Cortex motorius primarius (Area 4)',
+    system: 'Áreas de Brodmann',
+    targetLayer: 'Cerebrum',
+    categoryColor: '#10b981',
+    brodmannArea: 'BA 4',
+    position: [-0.20, 0.46, -0.04],
+    cameraOffset: [-0.85, 0.75, -0.15],
+    summary: 'Generación de impulsos motores voluntarios descendentes organizados según el homúnculo motor de Penfield.',
+    anatomy: 'Ocupa el giro precentral y la pared anterior del surco central. Contiene las células piramidales gigantes de Betz.',
+    function: 'Control motor fino fraccionado voluntario de la musculatura contralateral, especialmente dedos, manos y cara.',
+    clinicalSignificance: 'Lesión aguda (ictus o tumor) causa hemiplejía o paresia flácida contralateral que evoluciona a espasticidad (signo de Babinski e hiperreflexia).',
+    surgicalNotes: 'Mapeo subcortical intraoperatorio continuo con trenes de pulsos para preservar el haz corticoespinal piramidal.'
+  },
+  {
+    id: 'brodmann_312_sensory',
+    title: 'Corteza Somatosensorial Primaria (S1 / Áreas 3, 1, 2)',
+    latinTitle: 'Cortex somatosensorius primarius (Areae 3, 1, 2)',
+    system: 'Áreas de Brodmann',
+    targetLayer: 'Cerebrum',
+    categoryColor: '#10b981',
+    brodmannArea: 'BA 3, 1, 2',
+    position: [-0.22, 0.46, 0.08],
+    cameraOffset: [-0.85, 0.75, 0.35],
+    summary: 'Recepción somatotópica de sensaciones táctiles, propioceptivas, térmicas y nociceptivas del cuerpo.',
+    anatomy: 'Localizada en el giro poscentral. Recibe aferencias de los núcleos ventral posterolateral (VPL) y posteromedial (VPM) del tálamo.',
+    function: 'Discriminación táctil de dos puntos, esterognosia (reconocimiento de objetos por el tacto) y localización espacial de estímulos corporales.',
+    clinicalSignificance: 'Hipoestesia contralateral, asterognosia y extinción sensitiva.',
+    surgicalNotes: 'El registro de potenciales evocados somatosensoriales en el giro poscentral confirma con exactitud la cisura de Rolando.'
+  },
+  {
+    id: 'brodmann_44_45_broca',
+    title: 'Área de Broca (Lenguaje Expresivo / Áreas 44 y 45)',
+    latinTitle: 'Area motoria linguae (Area 44 & 45)',
+    system: 'Áreas de Brodmann',
+    targetLayer: 'Cerebrum',
+    categoryColor: '#10b981',
+    brodmannArea: 'BA 44 & 45',
+    position: [-0.32, 0.28, -0.18],
+    cameraOffset: [-1.05, 0.45, -0.45],
+    summary: 'Planificación y producción del lenguaje hablado; en la pars opercularis y triangularis del hemisferio dominante.',
+    anatomy: 'Situada en el giro frontal inferior del hemisferio dominante (generalmente izquierdo). Conectada con el área de Wernicke a través del fascículo arqueado.',
+    function: 'Coordinación motora orofacial, sintaxis gramatical y articulación fluida del habla y lenguaje de signos.',
+    clinicalSignificance: 'Afasia motora o de Broca (habla telegráfica no fluida, agramatismo y disartria con preservación relativa de la comprensión; el paciente es consciente de su déficit y siente frustración).',
+    surgicalNotes: 'Mandatorio realizar cirugía con el paciente despierto (awake craniotomy) para monitorizar el conteo y la fluidez verbal.'
+  },
+  {
+    id: 'brodmann_22_wernicke',
+    title: 'Área de Wernicke (Lenguaje Receptivo / Área 22)',
+    latinTitle: 'Area sensorialis linguae (Area 22)',
+    system: 'Áreas de Brodmann',
+    targetLayer: 'Cerebrum',
+    categoryColor: '#10b981',
+    brodmannArea: 'BA 22',
+    position: [-0.34, 0.26, 0.12],
+    cameraOffset: [-1.05, 0.45, 0.45],
+    summary: 'Decodificación fonológica y comprensión auditiva del lenguaje hablado en el tercio posterior de T1.',
+    anatomy: 'Porción posterior del giro temporal superior (T1) adyacente a la corteza auditiva primaria, extendiéndose hacia el giro supramarginal.',
+    function: 'Atribución de significado a las palabras escuchadas y formulación de estructuras léxicas coherentes.',
+    clinicalSignificance: 'Afasia sensitiva o de Wernicke (habla fluida pero carente de sentido, parafasias verbales, neologismos y jergafasia; incapacidad para comprender el lenguaje y anosognosia del defecto).',
+    surgicalNotes: 'Zona de elocuencia extrema en resecciones temporales posteriores; límite de seguridad posterior a 4-5 cm del polo temporal.'
+  },
+  {
+    id: 'brodmann_17_visual',
+    title: 'Corteza Visual Primaria (V1 / Área 17 de Brodmann)',
+    latinTitle: 'Cortex visualis primarius (Area 17)',
+    system: 'Áreas de Brodmann',
+    targetLayer: 'Cerebrum',
+    categoryColor: '#10b981',
+    brodmannArea: 'BA 17',
+    position: [-0.08, 0.18, 0.48],
+    cameraOffset: [-0.55, 0.35, 1.05],
+    summary: 'Corteza estriada pericalcarina receptora de las radiaciones ópticas de Gratiolet.',
+    anatomy: 'Ocupa los bordes de la cisura calcarina en la cara medial del lóbulo occipital. Se caracteriza histológicamente por la estría mielinizada de Gennari.',
+    function: 'Detección primaria de orientación de líneas, contrastes espaciales, frecuencias lumínicas y disparidad binocular.',
+    clinicalSignificance: 'Ceguera cortical o hemianopsia homónima estricta; fenómeno de visión ciega (blindsight).',
+    surgicalNotes: 'Vía de abordaje transcalloso o suboccipital con preservación de la arteria calcarina.'
+  },
+  {
+    id: 'brodmann_41_42_auditory',
+    title: 'Corteza Auditiva Primaria (Áreas 41 y 42 / Giros de Heschl)',
+    latinTitle: 'Cortex auditorius primarius (Area 41 & 42)',
+    system: 'Áreas de Brodmann',
+    targetLayer: 'Cerebrum',
+    categoryColor: '#10b981',
+    brodmannArea: 'BA 41 & 42',
+    position: [-0.32, 0.24, 0.00],
+    cameraOffset: [-0.95, 0.45, 0.25],
+    summary: 'Centro primario de recepción auditiva tonotópica en los giros transversos de Heschl.',
+    anatomy: 'Situada en la superficie superior de la circunvolución temporal superior, oculta dentro de la cisura de Silvio.',
+    function: 'Procesamiento tonotópico de frecuencias sonoras, discriminación tímbrica e inicio de la localización biaural del sonido.',
+    clinicalSignificance: 'Lesiones unilaterales producen mínima hipoacusia por bilateralidad de las vías auditivas pero alteran la localización espacial del sonido; lesiones bilaterales causan sordera cortical pura.',
+    surgicalNotes: 'Mapeo neurofisiológico con PEAT en abordajes transilvianos hacia el techo de la fosa media.'
   }
 ];
 

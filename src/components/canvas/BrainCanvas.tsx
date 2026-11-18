@@ -31,6 +31,10 @@ export function BrainCanvas() {
             antialias: true,
             alpha: false,
             powerPreference: 'high-performance',
+            localClippingEnabled: true,
+          }}
+          onCreated={({ gl }) => {
+            gl.localClippingEnabled = true;
           }}
           dpr={[1, 2]}
           onPointerMissed={() => {

@@ -4,8 +4,8 @@ import React, { useEffect, useMemo } from 'react';
 import { useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import { useBrainStore } from '@/store/useBrainStore';
-import { AnatomicalLayerId } from '@/types/brain';
-import { HOTSPOT_LAYER_MAP } from '@/data/hotspots';
+import { AnatomicalLayerId, PrimaryLayerId } from '@/types/brain';
+import { HOTSPOT_LAYER_MAP, MODEL_ORIGIN_OFFSET, LAYER_PARENT_MAP } from '@/data/hotspots';
 
 interface AnatomyMaterialSpec {
   color: string;
@@ -16,7 +16,8 @@ interface AnatomyMaterialSpec {
   convertMapLuma?: boolean;
 }
 
-const ANATOMY_SPECS: Record<AnatomicalLayerId, AnatomyMaterialSpec> = {
+const ANATOMY_SPECS: Record<string, AnatomyMaterialSpec> = {
+  // Legacy & Primary Layers
   Cerebrum: {
     color: '#d9a296', // Realistic organic living brain cortex pinkish-beige
     roughness: 0.38,
@@ -76,6 +77,141 @@ const ANATOMY_SPECS: Record<AnatomicalLayerId, AnatomyMaterialSpec> = {
     clearcoat: 0.6,
     clearcoatRoughness: 0.2,
   },
+
+  // Segmented Cerebral Lobes
+  Lobe_Frontal: {
+    color: '#d9a296',
+    roughness: 0.38,
+    metalness: 0.02,
+    clearcoat: 0.45,
+    clearcoatRoughness: 0.25,
+    convertMapLuma: true,
+  },
+  Lobe_Parietal: {
+    color: '#cca099',
+    roughness: 0.38,
+    metalness: 0.02,
+    clearcoat: 0.45,
+    clearcoatRoughness: 0.25,
+    convertMapLuma: true,
+  },
+  Lobe_Temporal: {
+    color: '#e2a89c',
+    roughness: 0.38,
+    metalness: 0.02,
+    clearcoat: 0.45,
+    clearcoatRoughness: 0.25,
+    convertMapLuma: true,
+  },
+  Lobe_Occipital: {
+    color: '#cfa59e',
+    roughness: 0.38,
+    metalness: 0.02,
+    clearcoat: 0.45,
+    clearcoatRoughness: 0.25,
+    convertMapLuma: true,
+  },
+  Lobe_Insular: {
+    color: '#e8ada1',
+    roughness: 0.36,
+    metalness: 0.02,
+    clearcoat: 0.5,
+    clearcoatRoughness: 0.2,
+    convertMapLuma: true,
+  },
+
+  // Segmented Brainstem
+  Brainstem_Mesencephalon: {
+    color: '#eddcc7',
+    roughness: 0.35,
+    metalness: 0.02,
+    clearcoat: 0.5,
+    clearcoatRoughness: 0.2,
+    convertMapLuma: true,
+  },
+  Brainstem_Pons: {
+    color: '#f2e4d2',
+    roughness: 0.35,
+    metalness: 0.02,
+    clearcoat: 0.5,
+    clearcoatRoughness: 0.2,
+    convertMapLuma: true,
+  },
+  Brainstem_Medulla: {
+    color: '#e5d4be',
+    roughness: 0.35,
+    metalness: 0.02,
+    clearcoat: 0.5,
+    clearcoatRoughness: 0.2,
+    convertMapLuma: true,
+  },
+
+  // Deep Subcortical Structures
+  Corpus_Callosum: {
+    color: '#fef08a',
+    roughness: 0.32,
+    metalness: 0.02,
+    clearcoat: 0.6,
+    clearcoatRoughness: 0.2,
+  },
+  Ventricular_System: {
+    color: '#38bdf8', // Cerebrospinal fluid crystalline cyan
+    roughness: 0.15,
+    metalness: 0.05,
+    clearcoat: 0.9,
+    clearcoatRoughness: 0.1,
+  },
+  Thalamus: {
+    color: '#f59e0b', // Diencephalic warm amber
+    roughness: 0.38,
+    metalness: 0.02,
+    clearcoat: 0.5,
+    clearcoatRoughness: 0.2,
+  },
+  Hippocampus: {
+    color: '#fb7185', // Archicortex coral-rose
+    roughness: 0.35,
+    metalness: 0.02,
+    clearcoat: 0.5,
+    clearcoatRoughness: 0.2,
+  },
+  Basal_Ganglia: {
+    color: '#eab308', // Striatum gold
+    roughness: 0.38,
+    metalness: 0.02,
+    clearcoat: 0.5,
+    clearcoatRoughness: 0.2,
+  },
+
+  // Dural Venous Sinuses
+  Sinus_Sagittal_Superior: {
+    color: '#1d4ed8',
+    roughness: 0.2,
+    metalness: 0.1,
+    clearcoat: 0.85,
+    clearcoatRoughness: 0.15,
+  },
+  Sinus_Transverse_Sigmoid: {
+    color: '#1e40af',
+    roughness: 0.2,
+    metalness: 0.1,
+    clearcoat: 0.85,
+    clearcoatRoughness: 0.15,
+  },
+
+  // 12 Cranial Nerves
+  CN_I_Olfactory: { color: '#fffbeb', roughness: 0.28, metalness: 0.04, clearcoat: 0.6, clearcoatRoughness: 0.2 },
+  CN_II_Optic: { color: '#fffbeb', roughness: 0.28, metalness: 0.04, clearcoat: 0.6, clearcoatRoughness: 0.2 },
+  CN_III_Oculomotor: { color: '#fffbeb', roughness: 0.28, metalness: 0.04, clearcoat: 0.6, clearcoatRoughness: 0.2 },
+  CN_IV_Trochlear: { color: '#fffbeb', roughness: 0.28, metalness: 0.04, clearcoat: 0.6, clearcoatRoughness: 0.2 },
+  CN_V_Trigeminal: { color: '#fffbeb', roughness: 0.28, metalness: 0.04, clearcoat: 0.6, clearcoatRoughness: 0.2 },
+  CN_VI_Abducens: { color: '#fffbeb', roughness: 0.28, metalness: 0.04, clearcoat: 0.6, clearcoatRoughness: 0.2 },
+  CN_VII_Facial: { color: '#fffbeb', roughness: 0.28, metalness: 0.04, clearcoat: 0.6, clearcoatRoughness: 0.2 },
+  CN_VIII_Vestibulocochlear: { color: '#fffbeb', roughness: 0.28, metalness: 0.04, clearcoat: 0.6, clearcoatRoughness: 0.2 },
+  CN_IX_Glossopharyngeal: { color: '#fffbeb', roughness: 0.28, metalness: 0.04, clearcoat: 0.6, clearcoatRoughness: 0.2 },
+  CN_X_Vagus: { color: '#fffbeb', roughness: 0.28, metalness: 0.04, clearcoat: 0.6, clearcoatRoughness: 0.2 },
+  CN_XI_Accessory: { color: '#fffbeb', roughness: 0.28, metalness: 0.04, clearcoat: 0.6, clearcoatRoughness: 0.2 },
+  CN_XII_Hypoglossal: { color: '#fffbeb', roughness: 0.28, metalness: 0.04, clearcoat: 0.6, clearcoatRoughness: 0.2 },
 };
 
 export function BrainModel() {
@@ -85,6 +221,24 @@ export function BrainModel() {
   const wireframe = useBrainStore((state) => state.wireframe);
   const selectedHotspotId = useBrainStore((state) => state.selectedHotspotId);
   const focusIsolationType = useBrainStore((state) => state.focusIsolationType);
+  const clippingAxis = useBrainStore((state) => state.clippingAxis);
+  const clippingOffset = useBrainStore((state) => state.clippingOffset);
+
+  // Clipping plane calculation taking scene group offset into account
+  const clippingPlanes = useMemo(() => {
+    if (clippingAxis === 'none') return null;
+
+    if (clippingAxis === 'sagittal') {
+      return [new THREE.Plane(new THREE.Vector3(1, 0, 0), -(MODEL_ORIGIN_OFFSET[0] + clippingOffset))];
+    }
+    if (clippingAxis === 'coronal') {
+      return [new THREE.Plane(new THREE.Vector3(0, 0, 1), -(MODEL_ORIGIN_OFFSET[2] + clippingOffset))];
+    }
+    if (clippingAxis === 'axial') {
+      return [new THREE.Plane(new THREE.Vector3(0, 1, 0), -(MODEL_ORIGIN_OFFSET[1] + clippingOffset))];
+    }
+    return null;
+  }, [clippingAxis, clippingOffset]);
 
   // Target layer currently in focus (if any)
   const focusedLayer: AnatomicalLayerId | null = selectedHotspotId
@@ -98,8 +252,8 @@ export function BrainModel() {
     clone.traverse((child) => {
       if ((child as THREE.Mesh).isMesh) {
         const mesh = child as THREE.Mesh;
-        const name = child.name as AnatomicalLayerId;
-        const spec = ANATOMY_SPECS[name];
+        const name = child.name;
+        const spec = ANATOMY_SPECS[name] || (LAYER_PARENT_MAP[name] ? ANATOMY_SPECS[LAYER_PARENT_MAP[name]] : null);
 
         if (spec && mesh.material) {
           const oldMat = (Array.isArray(mesh.material)
@@ -145,8 +299,8 @@ export function BrainModel() {
   // Update visibility, focus isolation, and opacity
   useEffect(() => {
     clonedScene.traverse((child) => {
-      const name = child.name as AnatomicalLayerId;
-      const spec = ANATOMY_SPECS[name];
+      const name = child.name;
+      const spec = ANATOMY_SPECS[name] || (LAYER_PARENT_MAP[name] ? ANATOMY_SPECS[LAYER_PARENT_MAP[name]] : null);
 
       if ((child as THREE.Mesh).isMesh) {
         const mesh = child as THREE.Mesh;
@@ -156,9 +310,21 @@ export function BrainModel() {
 
         mat.wireframe = wireframe;
 
+        // Apply cross-section clipping plane to parenchyma layers (Cerebral lobes & Cerebellum)
+        const isCerebrumParenchyma = name === 'Cerebrum' || LAYER_PARENT_MAP[name] === 'Cerebrum';
+        const shouldClip = isCerebrumParenchyma || name === 'Cerebellum';
+        mat.clippingPlanes = shouldClip && clippingPlanes ? clippingPlanes : null;
+        mat.clipShadows = true;
+        mat.side = THREE.DoubleSide;
+
+        const parentLayer = LAYER_PARENT_MAP[name] || (name as PrimaryLayerId);
+        const isParentVisible = parentLayer in layers ? layers[parentLayer as PrimaryLayerId] : true;
+
         // --- CASE 1: SURGICAL FOCUS MODE (A hotspot is selected) ---
         if (focusedLayer) {
-          if (name === focusedLayer) {
+          const isTarget = name === focusedLayer || (LAYER_PARENT_MAP[name] && LAYER_PARENT_MAP[name] === focusedLayer);
+
+          if (isTarget) {
             // Target structure: 100% full opacity, vibrant spec color + surgical emissive glow
             child.visible = true;
             mat.transparent = false;
@@ -174,7 +340,7 @@ export function BrainModel() {
             if (focusIsolationType === 'isolate') {
               child.visible = false;
             } else {
-              child.visible = layers[name];
+              child.visible = isParentVisible;
               mat.transparent = true;
               mat.opacity = 0.06;
               mat.depthWrite = false;
@@ -187,13 +353,11 @@ export function BrainModel() {
           }
         } else {
           // --- CASE 2: NORMAL OVERVIEW MODE ---
-          if (name in layers) {
-            child.visible = layers[name];
-          }
+          child.visible = isParentVisible;
 
           mat.emissive.set(0x000000);
 
-          if (name === 'Cerebrum') {
+          if (isCerebrumParenchyma) {
             const isTransparent = cerebrumOpacity < 0.98;
             mat.transparent = isTransparent;
             mat.opacity = cerebrumOpacity;
@@ -224,7 +388,7 @@ export function BrainModel() {
         mat.needsUpdate = true;
       }
     });
-  }, [clonedScene, layers, cerebrumOpacity, wireframe, focusedLayer, focusIsolationType]);
+  }, [clonedScene, layers, cerebrumOpacity, wireframe, focusedLayer, focusIsolationType, clippingPlanes]);
 
   return <primitive object={clonedScene} />;
 }
