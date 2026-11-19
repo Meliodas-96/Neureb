@@ -51,6 +51,7 @@ export default function Home() {
       }
 
       if (e.key === 'Escape') {
+        useBrainStore.getState().setHoveredHotspotId(null);
         if (isSearchOpen) {
           setIsSearchOpen(false);
         } else if (isHelpOpen) {

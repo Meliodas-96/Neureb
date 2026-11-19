@@ -88,6 +88,7 @@ export function CameraController() {
       autoRotateSpeed={1.2}
       onStart={() => {
         isTransitioning.current = false;
+        useBrainStore.getState().setHoveredHotspotId(null);
       }}
     />
   );

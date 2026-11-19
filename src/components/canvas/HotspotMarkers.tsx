@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useRef, useMemo, useEffect } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
 import * as THREE from 'three';
@@ -15,6 +15,8 @@ interface HotspotPinProps {
   selectedHotspotId: string | null;
   isVisible: boolean;
   onSelect: (id: string | null) => void;
+  isHovered: boolean;
+  onHover: (id: string | null) => void;
 }
 
 function HotspotPin({
@@ -23,6 +25,8 @@ function HotspotPin({
   selectedHotspotId,
   isVisible,
   onSelect,
+  isHovered,
+  onHover,
 }: HotspotPinProps) {
   const pinGroupRef = useRef<THREE.Group>(null);
   const htmlGroupRef = useRef<THREE.Group>(null);
@@ -30,7 +34,6 @@ function HotspotPin({
   const dotMatRef = useRef<THREE.MeshBasicMaterial>(null);
   const photonMeshRef = useRef<THREE.Mesh>(null);
 
-  const [isHovered, setIsHovered] = useState(false);
   const currentOpacity = useRef(0);
   const { camera } = useThree();
 
@@ -197,6 +200,7 @@ function HotspotPin({
         >
           <div
             ref={htmlWrapperRef}
+            data-hotspot-pin="true"
             style={{
               transition: 'transform 0.15s ease-out',
               willChange: 'opacity, transform',
@@ -204,16 +208,25 @@ function HotspotPin({
             className="relative flex items-center justify-center cursor-pointer group select-none min-w-[36px] min-h-[36px]"
             onClick={(e) => {
               e.stopPropagation();
+              onHover(null);
               onSelect(isSelected ? null : hotspot.id);
             }}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
+            onPointerEnter={(e) => {
+              // Ignore touch events so mobile taps don't leave a stuck hover label
+              if (e.pointerType !== 'touch') {
+                onHover(hotspot.id);
+              }
+            }}
+            onPointerLeave={() => {
+              onHover(null);
+            }}
             role="button"
             tabIndex={0}
             aria-label={`Punto anatómico: ${hotspot.title}`}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
+                onHover(null);
                 onSelect(isSelected ? null : hotspot.id);
               }
             }}
@@ -324,10 +337,24 @@ function HotspotPin({
 export function HotspotMarkers() {
   const selectedHotspotId = useBrainStore((state) => state.selectedHotspotId);
   const selectHotspot = useBrainStore((state) => state.selectHotspot);
+  const hoveredHotspotId = useBrainStore((state) => state.hoveredHotspotId);
+  const setHoveredHotspotId = useBrainStore((state) => state.setHoveredHotspotId);
   const layers = useBrainStore((state) => state.layers);
   const showHotspotMarkers = useBrainStore((state) => state.showHotspotMarkers);
   const activeSystemFilter = useBrainStore((state) => state.activeSystemFilter);
   const searchQuery = useBrainStore((state) => state.searchQuery);
+
+  // Global pointer listener: dismiss any open hotspot hover label when clicking outside
+  useEffect(() => {
+    const handleGlobalPointer = (e: PointerEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (!target?.closest('[data-hotspot-pin]')) {
+        setHoveredHotspotId(null);
+      }
+    };
+    window.addEventListener('pointerdown', handleGlobalPointer);
+    return () => window.removeEventListener('pointerdown', handleGlobalPointer);
+  }, [setHoveredHotspotId]);
 
   const cleanQuery = searchQuery.trim().toLowerCase();
 
@@ -360,6 +387,8 @@ export function HotspotMarkers() {
             selectedHotspotId={selectedHotspotId}
             isVisible={isVisible}
             onSelect={selectHotspot}
+            isHovered={hoveredHotspotId === hotspot.id}
+            onHover={setHoveredHotspotId}
           />
         );
       })}

@@ -23,6 +23,8 @@ interface BrainState {
   // Hotspots and Focus Mode
   selectedHotspotId: string | null;
   selectHotspot: (id: string | null) => void;
+  hoveredHotspotId: string | null;
+  setHoveredHotspotId: (id: string | null) => void;
   showHotspotMarkers: boolean;
   toggleHotspotMarkers: () => void;
   focusIsolationType: 'ghost' | 'isolate';
@@ -139,9 +141,12 @@ export const useBrainStore = create<BrainState>((set, get) => ({
     }),
 
   selectedHotspotId: null,
+  hoveredHotspotId: null,
+  setHoveredHotspotId: (id) => set({ hoveredHotspotId: id }),
   selectHotspot: (id) =>
     set({
       selectedHotspotId: id,
+      hoveredHotspotId: null,
       activeCameraPreset: null,
     }),
 
@@ -196,6 +201,7 @@ export const useBrainStore = create<BrainState>((set, get) => ({
       cerebrumOpacity: 1.0,
       isXRayMode: false,
       selectedHotspotId: null,
+      hoveredHotspotId: null,
       activeCameraPreset: 'isometric',
       autoRotate: false,
       wireframe: false,

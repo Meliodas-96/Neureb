@@ -12,6 +12,7 @@ import { MODEL_ORIGIN_OFFSET } from '@/data/hotspots';
 
 export function BrainCanvas() {
   const selectHotspot = useBrainStore((state) => state.selectHotspot);
+  const setHoveredHotspotId = useBrainStore((state) => state.setHoveredHotspotId);
 
   return (
     <CanvasErrorBoundary>
@@ -19,6 +20,13 @@ export function BrainCanvas() {
         className="w-full h-full relative z-0 cursor-grab active:cursor-grabbing select-none touch-none"
         role="region"
         aria-label="Lienzo de interacción 3D del cerebro humano"
+        onPointerDown={(e) => {
+          // If the pointer down is not inside a hotspot marker button, clear any active hover label
+          const target = e.target as HTMLElement | null;
+          if (!target?.closest('[data-hotspot-pin]')) {
+            setHoveredHotspotId(null);
+          }
+        }}
       >
         <Canvas
           camera={{
@@ -39,6 +47,7 @@ export function BrainCanvas() {
           dpr={[1, 2]}
           onPointerMissed={() => {
             selectHotspot(null);
+            setHoveredHotspotId(null);
           }}
         >
           <color attach="background" args={['#030712']} />
