@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useBrainStore } from '@/store/useBrainStore';
-import { Scissors, RotateCcw, Sliders, Check } from 'lucide-react';
+import { Scissors, RotateCcw, Sliders, Check, X } from 'lucide-react';
 
 export function ClippingControl() {
   const clippingAxis = useBrainStore((state) => state.clippingAxis);
@@ -11,6 +11,7 @@ export function ClippingControl() {
   const setClippingOffset = useBrainStore((state) => state.setClippingOffset);
   const isClippingPanelOpen = useBrainStore((state) => state.isClippingPanelOpen);
   const setIsClippingPanelOpen = useBrainStore((state) => state.setIsClippingPanelOpen);
+  const setIsOpacityPanelOpen = useBrainStore((state) => state.setIsOpacityPanelOpen);
 
   const axes = [
     { id: 'none', label: 'Sin Corte' },
@@ -19,17 +20,25 @@ export function ClippingControl() {
     { id: 'axial', label: 'Axial (Horizontal)' },
   ] as const;
 
+  const togglePanel = () => {
+    const next = !isClippingPanelOpen;
+    setIsClippingPanelOpen(next);
+    if (next) {
+      setIsOpacityPanelOpen(false);
+    }
+  };
+
   return (
-    <div className="fixed left-3 bottom-24 z-30 pointer-events-auto">
+    <div className="fixed bottom-14 left-3 md:bottom-16 md:left-[23rem] z-30 pointer-events-auto">
       {/* Toggle button */}
       <button
-        onClick={() => setIsClippingPanelOpen(!isClippingPanelOpen)}
-        className={`px-3 py-2 rounded-xl text-xs font-semibold backdrop-blur-xl border transition shadow-lg flex items-center gap-2 ${
+        onClick={togglePanel}
+        className={`px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-semibold backdrop-blur-xl border transition shadow-lg flex items-center gap-1.5 sm:gap-2 ${
           clippingAxis !== 'none'
             ? 'bg-amber-950/60 border-amber-500/50 text-amber-300 shadow-amber-950/40'
             : isClippingPanelOpen
             ? 'bg-slate-900 border-cyan-500/50 text-cyan-300'
-            : 'bg-slate-950/80 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-900/90'
+            : 'bg-slate-950/90 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-900/90'
         }`}
         aria-label="Abrir panel de planos de corte anatómicos"
         title="Planos de corte anatómicos en tiempo real"
@@ -43,25 +52,34 @@ export function ClippingControl() {
 
       {/* Popover Panel */}
       {isClippingPanelOpen && (
-        <div className="absolute left-0 bottom-12 w-72 p-3.5 rounded-2xl border border-slate-800/90 bg-slate-950/98 backdrop-blur-2xl shadow-2xl glass-panel text-xs animate-in fade-in slide-in-from-bottom-2 duration-150">
+        <div className="absolute left-0 bottom-11 sm:bottom-12 w-72 max-w-[calc(100vw-1.5rem)] p-3.5 rounded-2xl border border-slate-800/90 bg-slate-950/98 backdrop-blur-2xl shadow-2xl glass-panel text-xs animate-in fade-in slide-in-from-bottom-2 duration-150">
           <div className="flex items-center justify-between pb-2 mb-3 border-b border-slate-800/80">
             <div className="flex items-center gap-1.5 font-bold text-slate-100">
               <Scissors className="w-4 h-4 text-cyan-400" />
               <span>Planos de Corte 3D</span>
             </div>
-            {clippingAxis !== 'none' && (
+            <div className="flex items-center gap-2">
+              {clippingAxis !== 'none' && (
+                <button
+                  onClick={() => {
+                    setClippingAxis('none');
+                    setClippingOffset(0);
+                  }}
+                  className="text-[10px] text-amber-400 hover:text-amber-300 flex items-center gap-1 transition"
+                  title="Restablecer cortes"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  Desactivar
+                </button>
+              )}
               <button
-                onClick={() => {
-                  setClippingAxis('none');
-                  setClippingOffset(0);
-                }}
-                className="text-[10px] text-amber-400 hover:text-amber-300 flex items-center gap-1 transition"
-                title="Restablecer cortes"
+                onClick={() => setIsClippingPanelOpen(false)}
+                className="p-1 text-slate-400 hover:text-white rounded"
+                aria-label="Cerrar panel de cortes"
               >
-                <RotateCcw className="w-3 h-3" />
-                Desactivar
+                <X className="w-3.5 h-3.5" />
               </button>
-            )}
+            </div>
           </div>
 
           {/* Plane Selector Buttons */}
@@ -117,10 +135,10 @@ export function ClippingControl() {
                 </button>
                 <span className="text-slate-400 italic">
                   {clippingAxis === 'sagittal'
-                    ? 'Cara Medial / Tronco'
+                    ? 'Cara Medial'
                     : clippingAxis === 'coronal'
                     ? 'Corte Frontal'
-                    : 'Corte Horizontal'}
+                    : 'Corte Axial'}
                 </span>
               </div>
             </div>

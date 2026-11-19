@@ -19,6 +19,8 @@ import {
   GraduationCap,
   Search,
   Activity,
+  SlidersHorizontal,
+  Sparkles,
 } from 'lucide-react';
 
 interface TopNavProps {
@@ -49,6 +51,9 @@ export function TopNav({ onToggleLayerPanel, isLayerPanelOpen, onOpenHelp }: Top
   const setSearchQuery = useBrainStore((state) => state.setSearchQuery);
 
   const [copiedLink, setCopiedLink] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const isXRayMode = useBrainStore((state) => state.isXRayMode);
+  const toggleXRayMode = useBrainStore((state) => state.toggleXRayMode);
 
   const activeHotspot = selectedHotspotId
     ? HOTSPOTS_DATA.find((h) => h.id === selectedHotspotId)
@@ -112,10 +117,10 @@ export function TopNav({ onToggleLayerPanel, isLayerPanelOpen, onOpenHelp }: Top
 
       {/* Center Indicator: Surgical Focus Mode Active or Model Spec */}
       {activeHotspot ? (
-        <div className="flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl border border-cyan-500/50 bg-cyan-950/50 glass-panel pointer-events-auto shadow-lg shadow-cyan-950/60 animate-in fade-in zoom-in-95 duration-200">
+        <div className="hidden sm:flex items-center gap-2.5 px-3 py-1.5 rounded-xl border border-cyan-500/50 bg-cyan-950/50 glass-panel pointer-events-auto shadow-lg shadow-cyan-950/60 animate-in fade-in zoom-in-95 duration-200">
           <Crosshair className="w-3.5 h-3.5 text-cyan-400 animate-spin" style={{ animationDuration: '6s' }} />
-          <span className="text-xs font-bold text-cyan-300 tracking-wide">
-            ENFOQUE: {activeHotspot.title}
+          <span className="text-xs font-bold text-cyan-300 tracking-wide truncate max-w-[130px] md:max-w-xs">
+            {activeHotspot.title}
           </span>
           <button
             onClick={() => selectHotspot(null)}
@@ -123,7 +128,7 @@ export function TopNav({ onToggleLayerPanel, isLayerPanelOpen, onOpenHelp }: Top
             aria-label="Desactivar enfoque y ver todo el cerebro"
           >
             <X className="w-3 h-3 text-cyan-400" />
-            <span>Ver Todo</span>
+            <span className="hidden md:inline">Ver Todo</span>
           </button>
         </div>
       ) : (
@@ -138,10 +143,10 @@ export function TopNav({ onToggleLayerPanel, isLayerPanelOpen, onOpenHelp }: Top
 
       {/* Action Toolbar */}
       <div className="flex items-center gap-1.5 pointer-events-auto" role="toolbar" aria-label="Herramientas del visor 3D">
-        {/* Search Modal Trigger (Lupa) */}
+        {/* Search Modal Trigger (Always Visible) */}
         <button
           onClick={() => setIsSearchOpen(true)}
-          className={`px-3 py-2 rounded-xl border transition-all glass-panel flex items-center gap-2 focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none ${
+          className={`px-2.5 sm:px-3 py-2 rounded-xl border transition-all glass-panel flex items-center gap-1.5 sm:gap-2 focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none ${
             isSearchOpen || activeSystemFilter !== 'all' || searchQuery
               ? 'text-cyan-300 border-cyan-500/50 bg-cyan-950/40 shadow-lg shadow-cyan-950/30'
               : 'text-slate-300 border-slate-800 hover:border-cyan-500/50 hover:text-white'
@@ -168,93 +173,18 @@ export function TopNav({ onToggleLayerPanel, isLayerPanelOpen, onOpenHelp }: Top
               <X className="w-3 h-3" />
             </span>
           )}
-          <kbd className="hidden sm:inline text-[10px] px-1.5 py-0.2 rounded bg-slate-800/90 border border-slate-700/60 text-slate-400 font-mono">
+          <kbd className="hidden lg:inline text-[10px] px-1.5 py-0.2 rounded bg-slate-800/90 border border-slate-700/60 text-slate-400 font-mono">
             ⌘K
           </kbd>
         </button>
-        {/* Share View Link */}
-        <button
-          onClick={handleCopyShareLink}
-          className={`p-2.5 rounded-xl border transition-all glass-panel hover:border-slate-500 focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none ${
-            copiedLink ? 'text-emerald-400 border-emerald-500/50 bg-emerald-950/40' : 'text-slate-400 border-slate-800'
-          }`}
-          aria-label={copiedLink ? 'Enlace copiado al portapapeles' : 'Copiar enlace directo con vista activa'}
-          title={copiedLink ? '¡Enlace copiado!' : 'Copiar enlace directo con vista activa'}
-        >
-          {copiedLink ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
-        </button>
 
-        {/* Toggle Hotspot Markers on/off */}
-        <button
-          onClick={toggleHotspotMarkers}
-          className={`p-2.5 rounded-xl border transition-all glass-panel hover:border-slate-500 focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none ${
-            showHotspotMarkers
-              ? 'text-cyan-400 border-cyan-500/40 bg-cyan-950/30'
-              : 'text-slate-500 border-slate-800'
-          }`}
-          aria-label={showHotspotMarkers ? 'Ocultar puntos de interés 3D' : 'Mostrar puntos de interés 3D'}
-          aria-pressed={showHotspotMarkers}
-          title={showHotspotMarkers ? 'Ocultar puntos de interés 3D' : 'Mostrar puntos de interés 3D'}
-        >
-          {showHotspotMarkers ? (
-            <MapPin className="w-4 h-4" />
-          ) : (
-            <MapPinOff className="w-4 h-4" />
-          )}
-        </button>
-
-        {/* Real-time Hemodynamics & Bio-pulse Toggle */}
-        <button
-          onClick={toggleLiveBiologicalAnimation}
-          className={`p-2.5 rounded-xl border transition-all glass-panel hover:border-slate-500 focus-visible:ring-2 focus-visible:ring-rose-400 focus-visible:outline-none ${
-            isLiveBiologicalAnimation
-              ? 'text-rose-400 border-rose-500/40 bg-rose-950/40 shadow-lg shadow-rose-950/40'
-              : 'text-slate-500 border-slate-800'
-          }`}
-          aria-label={isLiveBiologicalAnimation ? 'Pausar fisiología y flujo sanguíneo' : 'Activar flujo sanguíneo y pulsación en tiempo real'}
-          aria-pressed={isLiveBiologicalAnimation}
-          title={isLiveBiologicalAnimation ? 'Fisiología activa: flujo arterial/venoso y pulso cerebral' : 'Activar flujo sanguíneo y pulsación'}
-        >
-          <Activity className={`w-4 h-4 ${isLiveBiologicalAnimation ? 'animate-pulse' : ''}`} />
-        </button>
-
-        {/* Auto Rotate Toggle */}
-        <button
-          onClick={toggleAutoRotate}
-          className={`p-2.5 rounded-xl border transition-all glass-panel hover:border-slate-500 focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none ${
-            autoRotate
-              ? 'text-cyan-400 border-cyan-500/50 bg-cyan-950/30 shadow-lg shadow-cyan-950/40'
-              : 'text-slate-400 border-slate-800'
-          }`}
-          aria-label={autoRotate ? 'Pausar rotación automática' : 'Activar rotación automática'}
-          aria-pressed={autoRotate}
-          title={autoRotate ? 'Pausar rotación' : 'Rotación automática continua'}
-        >
-          <RotateCw className={`w-4 h-4 ${autoRotate ? 'animate-spin' : ''}`} />
-        </button>
-
-        {/* Wireframe Hologram Toggle */}
-        <button
-          onClick={toggleWireframe}
-          className={`p-2.5 rounded-xl border transition-all glass-panel hover:border-slate-500 focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none ${
-            wireframe
-              ? 'text-cyan-300 border-cyan-400/60 bg-cyan-950/40'
-              : 'text-slate-400 border-slate-800'
-          }`}
-          aria-label={wireframe ? 'Desactivar modo malla wireframe' : 'Activar modo malla wireframe'}
-          aria-pressed={wireframe}
-          title={wireframe ? 'Desactivar malla wireframe' : 'Modo malla holográfica'}
-        >
-          <Box className="w-4 h-4" />
-        </button>
-
-        {/* Study & Quiz Mode */}
+        {/* Study & Quiz Mode (Always Visible) */}
         <button
           onClick={() => setIsQuizOpen(!isQuizOpen)}
-          className={`p-2.5 rounded-xl border transition-all glass-panel focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none flex items-center gap-1.5 ${
+          className={`p-2 sm:px-3 sm:py-2 rounded-xl border transition-all glass-panel focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none flex items-center gap-1.5 ${
             isQuizOpen
               ? 'text-emerald-300 border-emerald-500/50 bg-emerald-950/40 shadow-lg shadow-emerald-950/40'
-              : 'text-slate-400 border-slate-800 hover:text-emerald-400 hover:border-emerald-500/40'
+              : 'text-slate-300 border-slate-800 hover:text-emerald-400 hover:border-emerald-500/40'
           }`}
           aria-label={isQuizOpen ? 'Cerrar modo estudio y quiz' : 'Abrir modo estudio y quiz neuroanatómico'}
           title="Modo Estudio & Quiz Clínico 3D"
@@ -263,36 +193,314 @@ export function TopNav({ onToggleLayerPanel, isLayerPanelOpen, onOpenHelp }: Top
           <span className="text-xs font-semibold hidden md:inline text-emerald-300">Quiz</span>
         </button>
 
-        {/* Capture Snapshot */}
-        <button
-          onClick={handleCaptureScreenshot}
-          className="p-2.5 rounded-xl border border-slate-800 text-slate-400 hover:text-slate-100 hover:border-slate-500 transition-all glass-panel focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none"
-          aria-label="Captura de pantalla HD en formato PNG"
-          title="Captura de pantalla HD (PNG)"
-        >
-          <Camera className="w-4 h-4" />
-        </button>
+        {/* --- DESKTOP TOOLBAR BUTTONS (hidden on mobile) --- */}
+        <div className="hidden md:flex items-center gap-1.5">
+          {/* Share View Link */}
+          <button
+            onClick={handleCopyShareLink}
+            className={`p-2.5 rounded-xl border transition-all glass-panel hover:border-slate-500 focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none ${
+              copiedLink ? 'text-emerald-400 border-emerald-500/50 bg-emerald-950/40' : 'text-slate-400 border-slate-800'
+            }`}
+            aria-label={copiedLink ? 'Enlace copiado al portapapeles' : 'Copiar enlace directo con vista activa'}
+            title={copiedLink ? '¡Enlace copiado!' : 'Copiar enlace directo con vista activa'}
+          >
+            {copiedLink ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
+          </button>
 
-        {/* Help / Controls Guide Modal */}
-        <button
-          onClick={onOpenHelp}
-          className="p-2.5 rounded-xl border border-slate-800 text-slate-400 hover:text-cyan-400 hover:border-cyan-500/50 transition-all glass-panel focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none"
-          aria-label="Abrir guía de ayuda y controles de navegación"
-          title="Guía de navegación y atajos [?]"
-        >
-          <HelpCircle className="w-4 h-4" />
-        </button>
+          {/* Toggle Hotspot Markers on/off */}
+          <button
+            onClick={toggleHotspotMarkers}
+            className={`p-2.5 rounded-xl border transition-all glass-panel hover:border-slate-500 focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none ${
+              showHotspotMarkers
+                ? 'text-cyan-400 border-cyan-500/40 bg-cyan-950/30'
+                : 'text-slate-500 border-slate-800'
+            }`}
+            aria-label={showHotspotMarkers ? 'Ocultar puntos de interés 3D' : 'Mostrar puntos de interés 3D'}
+            aria-pressed={showHotspotMarkers}
+            title={showHotspotMarkers ? 'Ocultar puntos de interés 3D' : 'Mostrar puntos de interés 3D'}
+          >
+            {showHotspotMarkers ? (
+              <MapPin className="w-4 h-4" />
+            ) : (
+              <MapPinOff className="w-4 h-4" />
+            )}
+          </button>
 
-        {/* Reset View */}
+          {/* Real-time Hemodynamics & Bio-pulse Toggle */}
+          <button
+            onClick={toggleLiveBiologicalAnimation}
+            className={`p-2.5 rounded-xl border transition-all glass-panel hover:border-slate-500 focus-visible:ring-2 focus-visible:ring-rose-400 focus-visible:outline-none ${
+              isLiveBiologicalAnimation
+                ? 'text-rose-400 border-rose-500/40 bg-rose-950/40 shadow-lg shadow-rose-950/40'
+                : 'text-slate-500 border-slate-800'
+            }`}
+            aria-label={isLiveBiologicalAnimation ? 'Pausar fisiología y flujo sanguíneo' : 'Activar flujo sanguíneo y pulsación en tiempo real'}
+            aria-pressed={isLiveBiologicalAnimation}
+            title={isLiveBiologicalAnimation ? 'Fisiología activa: flujo arterial/venoso y pulso cerebral' : 'Activar flujo sanguíneo y pulsación'}
+          >
+            <Activity className={`w-4 h-4 ${isLiveBiologicalAnimation ? 'animate-pulse' : ''}`} />
+          </button>
+
+          {/* Auto Rotate Toggle */}
+          <button
+            onClick={toggleAutoRotate}
+            className={`p-2.5 rounded-xl border transition-all glass-panel hover:border-slate-500 focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none ${
+              autoRotate
+                ? 'text-cyan-400 border-cyan-500/50 bg-cyan-950/30 shadow-lg shadow-cyan-950/40'
+                : 'text-slate-400 border-slate-800'
+            }`}
+            aria-label={autoRotate ? 'Pausar rotación automática' : 'Activar rotación automática'}
+            aria-pressed={autoRotate}
+            title={autoRotate ? 'Pausar rotación' : 'Rotación automática continua'}
+          >
+            <RotateCw className={`w-4 h-4 ${autoRotate ? 'animate-spin' : ''}`} />
+          </button>
+
+          {/* Wireframe Hologram Toggle */}
+          <button
+            onClick={toggleWireframe}
+            className={`p-2.5 rounded-xl border transition-all glass-panel hover:border-slate-500 focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none ${
+              wireframe
+                ? 'text-cyan-300 border-cyan-400/60 bg-cyan-950/40'
+                : 'text-slate-400 border-slate-800'
+            }`}
+            aria-label={wireframe ? 'Desactivar modo malla wireframe' : 'Activar modo malla wireframe'}
+            aria-pressed={wireframe}
+            title={wireframe ? 'Desactivar malla wireframe' : 'Modo malla holográfica'}
+          >
+            <Box className="w-4 h-4" />
+          </button>
+
+          {/* Capture Snapshot */}
+          <button
+            onClick={handleCaptureScreenshot}
+            className="p-2.5 rounded-xl border border-slate-800 text-slate-400 hover:text-slate-100 hover:border-slate-500 transition-all glass-panel focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none"
+            aria-label="Captura de pantalla HD en formato PNG"
+            title="Captura de pantalla HD (PNG)"
+          >
+            <Camera className="w-4 h-4" />
+          </button>
+
+          {/* Help / Controls Guide Modal */}
+          <button
+            onClick={onOpenHelp}
+            className="p-2.5 rounded-xl border border-slate-800 text-slate-400 hover:text-cyan-400 hover:border-cyan-500/50 transition-all glass-panel focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none"
+            aria-label="Abrir guía de ayuda y controles de navegación"
+            title="Guía de navegación y atajos [?]"
+          >
+            <HelpCircle className="w-4 h-4" />
+          </button>
+
+          {/* Reset View */}
+          <button
+            onClick={resetView}
+            className="p-2.5 rounded-xl border border-slate-800 text-slate-400 hover:text-slate-100 hover:border-slate-500 transition-all glass-panel focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none"
+            aria-label="Restablecer orientación, capas y zoom a valores predeterminados"
+            title="Restablecer vista completa"
+          >
+            <RotateCcw className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* --- MOBILE COMPACT TOOLS TRIGGER BUTTON (md:hidden) --- */}
         <button
-          onClick={resetView}
-          className="p-2.5 rounded-xl border border-slate-800 text-slate-400 hover:text-slate-100 hover:border-slate-500 transition-all glass-panel focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none"
-          aria-label="Restablecer orientación, capas y zoom a valores predeterminados"
-          title="Restablecer vista completa"
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className={`md:hidden p-2 rounded-xl border transition-all glass-panel flex items-center justify-center focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none ${
+            isMobileMenuOpen
+              ? 'text-cyan-300 border-cyan-500/50 bg-cyan-950/40 shadow-lg shadow-cyan-950/30'
+              : 'text-slate-300 border-slate-800 hover:border-cyan-500/50'
+          }`}
+          aria-label="Abrir menú de herramientas del visor"
+          title="Herramientas y ajustes"
         >
-          <RotateCcw className="w-4 h-4" />
+          <SlidersHorizontal className="w-4 h-4 text-cyan-400" />
         </button>
       </div>
+
+      {/* --- MOBILE TOOLS MODAL SHEET (md:hidden) --- */}
+      {isMobileMenuOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md pointer-events-auto md:hidden flex flex-col justify-end animate-in fade-in duration-200"
+          onClick={() => setIsMobileMenuOpen(false)}
+        >
+          <div
+            className="bg-slate-950/98 border-t border-slate-800 rounded-t-3xl p-5 shadow-2xl glass-panel max-h-[80dvh] overflow-y-auto animate-in slide-in-from-bottom duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Handle Bar */}
+            <div className="w-12 h-1.5 bg-slate-700/80 rounded-full mx-auto mb-4" />
+
+            <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
+              <div className="flex items-center gap-2">
+                <SlidersHorizontal className="w-4 h-4 text-cyan-400" />
+                <h3 className="text-sm font-bold uppercase tracking-wider text-slate-100">
+                  Herramientas y Modos 3D
+                </h3>
+              </div>
+              <button
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="p-1.5 text-slate-400 hover:text-white bg-slate-900 rounded-xl border border-slate-800 transition"
+                aria-label="Cerrar menú"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Quick Toggle Grid */}
+            <div className="grid grid-cols-2 gap-2.5">
+              {/* Bio Pulse */}
+              <button
+                onClick={toggleLiveBiologicalAnimation}
+                className={`p-3 rounded-xl border flex flex-col items-start gap-1.5 transition text-left ${
+                  isLiveBiologicalAnimation
+                    ? 'bg-rose-950/40 border-rose-500/50 text-rose-300'
+                    : 'bg-slate-900/60 border-slate-800 text-slate-400'
+                }`}
+              >
+                <div className="flex items-center justify-between w-full">
+                  <Activity className={`w-4 h-4 ${isLiveBiologicalAnimation ? 'text-rose-400 animate-pulse' : 'text-slate-500'}`} />
+                  <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded ${isLiveBiologicalAnimation ? 'bg-rose-500/20 text-rose-300' : 'bg-slate-800 text-slate-500'}`}>
+                    {isLiveBiologicalAnimation ? 'ACTIVO' : 'PAUSA'}
+                  </span>
+                </div>
+                <span className="text-xs font-semibold text-slate-200">Pulso Fisiológico</span>
+                <span className="text-[10px] text-slate-400 leading-tight">Flujo arterial y hemodinámica</span>
+              </button>
+
+              {/* X-Ray */}
+              <button
+                onClick={toggleXRayMode}
+                className={`p-3 rounded-xl border flex flex-col items-start gap-1.5 transition text-left ${
+                  isXRayMode
+                    ? 'bg-cyan-950/40 border-cyan-500/50 text-cyan-300'
+                    : 'bg-slate-900/60 border-slate-800 text-slate-400'
+                }`}
+              >
+                <div className="flex items-center justify-between w-full">
+                  <Sparkles className={`w-4 h-4 ${isXRayMode ? 'text-cyan-400' : 'text-slate-500'}`} />
+                  <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded ${isXRayMode ? 'bg-cyan-500/20 text-cyan-300' : 'bg-slate-800 text-slate-500'}`}>
+                    {isXRayMode ? 'ACTIVO' : 'OFF'}
+                  </span>
+                </div>
+                <span className="text-xs font-semibold text-slate-200">Modo Rayos X</span>
+                <span className="text-[10px] text-slate-400 leading-tight">Transparencia cortical (22%)</span>
+              </button>
+
+              {/* Auto Rotate */}
+              <button
+                onClick={toggleAutoRotate}
+                className={`p-3 rounded-xl border flex flex-col items-start gap-1.5 transition text-left ${
+                  autoRotate
+                    ? 'bg-cyan-950/40 border-cyan-500/50 text-cyan-300'
+                    : 'bg-slate-900/60 border-slate-800 text-slate-400'
+                }`}
+              >
+                <div className="flex items-center justify-between w-full">
+                  <RotateCw className={`w-4 h-4 ${autoRotate ? 'text-cyan-400 animate-spin' : 'text-slate-500'}`} />
+                  <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded ${autoRotate ? 'bg-cyan-500/20 text-cyan-300' : 'bg-slate-800 text-slate-500'}`}>
+                    {autoRotate ? 'GIRANDO' : 'PAUSA'}
+                  </span>
+                </div>
+                <span className="text-xs font-semibold text-slate-200">Rotación 360°</span>
+                <span className="text-[10px] text-slate-400 leading-tight">Órbita automática continua</span>
+              </button>
+
+              {/* Wireframe */}
+              <button
+                onClick={toggleWireframe}
+                className={`p-3 rounded-xl border flex flex-col items-start gap-1.5 transition text-left ${
+                  wireframe
+                    ? 'bg-cyan-950/40 border-cyan-500/50 text-cyan-300'
+                    : 'bg-slate-900/60 border-slate-800 text-slate-400'
+                }`}
+              >
+                <div className="flex items-center justify-between w-full">
+                  <Box className={`w-4 h-4 ${wireframe ? 'text-cyan-400' : 'text-slate-500'}`} />
+                  <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded ${wireframe ? 'bg-cyan-500/20 text-cyan-300' : 'bg-slate-800 text-slate-500'}`}>
+                    {wireframe ? 'ACTIVO' : 'OFF'}
+                  </span>
+                </div>
+                <span className="text-xs font-semibold text-slate-200">Malla Holográfica</span>
+                <span className="text-[10px] text-slate-400 leading-tight">Estructura poligonal</span>
+              </button>
+
+              {/* Hotspot Markers */}
+              <button
+                onClick={toggleHotspotMarkers}
+                className={`p-3 rounded-xl border flex flex-col items-start gap-1.5 transition text-left ${
+                  showHotspotMarkers
+                    ? 'bg-cyan-950/40 border-cyan-500/50 text-cyan-300'
+                    : 'bg-slate-900/60 border-slate-800 text-slate-400'
+                }`}
+              >
+                <div className="flex items-center justify-between w-full">
+                  {showHotspotMarkers ? <MapPin className="w-4 h-4 text-cyan-400" /> : <MapPinOff className="w-4 h-4 text-slate-500" />}
+                  <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded ${showHotspotMarkers ? 'bg-cyan-500/20 text-cyan-300' : 'bg-slate-800 text-slate-500'}`}>
+                    {showHotspotMarkers ? 'VISIBLES' : 'OCULTOS'}
+                  </span>
+                </div>
+                <span className="text-xs font-semibold text-slate-200">Puntos 3D</span>
+                <span className="text-[10px] text-slate-400 leading-tight">Balizas y marcadores</span>
+              </button>
+
+              {/* Share link */}
+              <button
+                onClick={handleCopyShareLink}
+                className="p-3 rounded-xl border bg-slate-900/60 border-slate-800 hover:border-slate-700 flex flex-col items-start gap-1.5 transition text-left"
+              >
+                <div className="flex items-center justify-between w-full">
+                  {copiedLink ? <Check className="w-4 h-4 text-emerald-400" /> : <Share2 className="w-4 h-4 text-slate-400" />}
+                  {copiedLink && (
+                    <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300">
+                      ¡COPIADO!
+                    </span>
+                  )}
+                </div>
+                <span className="text-xs font-semibold text-slate-200">Compartir Vista</span>
+                <span className="text-[10px] text-slate-400 leading-tight">Enlace directo con estado</span>
+              </button>
+
+              {/* Screenshot */}
+              <button
+                onClick={() => {
+                  handleCaptureScreenshot();
+                  setIsMobileMenuOpen(false);
+                }}
+                className="p-3 rounded-xl border bg-slate-900/60 border-slate-800 hover:border-slate-700 flex flex-col items-start gap-1.5 transition text-left"
+              >
+                <Camera className="w-4 h-4 text-slate-400" />
+                <span className="text-xs font-semibold text-slate-200">Captura HD</span>
+                <span className="text-[10px] text-slate-400 leading-tight">Descargar imagen PNG</span>
+              </button>
+
+              {/* Help Guide */}
+              <button
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  onOpenHelp();
+                }}
+                className="p-3 rounded-xl border bg-slate-900/60 border-slate-800 hover:border-slate-700 flex flex-col items-start gap-1.5 transition text-left"
+              >
+                <HelpCircle className="w-4 h-4 text-slate-400" />
+                <span className="text-xs font-semibold text-slate-200">Guía de Ayuda</span>
+                <span className="text-[10px] text-slate-400 leading-tight">Gestos táctiles y atajos</span>
+              </button>
+            </div>
+
+            {/* Reset View Button */}
+            <button
+              onClick={() => {
+                resetView();
+                setIsMobileMenuOpen(false);
+              }}
+              className="w-full mt-4 py-2.5 px-4 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white font-semibold text-xs flex items-center justify-center gap-2 transition"
+            >
+              <RotateCcw className="w-4 h-4 text-cyan-400" />
+              <span>Restablecer Toda la Vista Anatómica</span>
+            </button>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

@@ -30,6 +30,23 @@ body {
   background: rgba(100, 116, 139, 0.9);
 }
 
+/* Hide scrollbar for tabs and mobile carousels */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Mobile Safe Areas */
+.safe-top {
+  padding-top: max(0.75rem, env(safe-area-inset-top, 0.75rem));
+}
+.safe-bottom {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0.75rem));
+}
+
 /* Glassmorphism Panel Class - Clinical Obsidian Finish (Opaque to prevent any 3D marker bleed-through) */
 .glass-panel {
   background: rgba(6, 11, 23, 0.98);

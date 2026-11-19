@@ -36,28 +36,36 @@ export function LayerPanel({ isOpen, onClose }: LayerPanelProps) {
   const areAllParenchymaVisible = parenchyma.every((l) => layers[l.id]);
 
   return (
-    <aside
-      className="fixed left-3 top-16 bottom-20 z-40 w-80 max-w-[calc(100vw-1.5rem)] flex flex-col rounded-2xl border border-slate-800/80 bg-slate-950/98 backdrop-blur-2xl glass-panel shadow-2xl overflow-hidden pointer-events-auto transition-all animate-in fade-in slide-in-from-left duration-200"
-      role="region"
-      aria-label="Panel de capas anatómicas"
-    >
-      {/* Panel Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800/80 bg-slate-900/60">
-        <div className="flex items-center gap-2">
-          <Activity className="w-4 h-4 text-cyan-400" />
-          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-100">
-            Capas Anatómicas
-          </h2>
+    <>
+      {/* Mobile Backdrop overlay (tap outside to close drawer) */}
+      <div
+        onClick={onClose}
+        className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-40 md:hidden animate-in fade-in duration-200"
+        aria-hidden="true"
+      />
+
+      <aside
+        className="fixed inset-y-0 left-0 z-50 w-80 max-w-[85vw] md:inset-y-auto md:left-3 md:top-16 md:bottom-20 md:w-80 md:rounded-2xl md:z-40 flex flex-col border-r md:border border-slate-800/80 bg-slate-950/98 backdrop-blur-2xl glass-panel shadow-2xl overflow-hidden pointer-events-auto transition-all animate-in slide-in-from-left duration-200"
+        role="region"
+        aria-label="Panel de capas anatómicas"
+      >
+        {/* Panel Header */}
+        <div className="flex items-center justify-between px-4 py-3.5 border-b border-slate-800/80 bg-slate-900/60 safe-top">
+          <div className="flex items-center gap-2">
+            <Activity className="w-4 h-4 text-cyan-400" />
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-100">
+              Capas Anatómicas
+            </h2>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-1.5 text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 rounded-xl transition focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none"
+            aria-label="Cerrar panel de capas"
+            title="Cerrar panel"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
-        <button
-          onClick={onClose}
-          className="p-1 text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 rounded-lg transition focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none"
-          aria-label="Cerrar panel de capas"
-          title="Cerrar panel"
-        >
-          <X className="w-4 h-4" />
-        </button>
-      </div>
 
       {/* Quick Filter Actions */}
       <div className="flex items-center gap-1.5 px-3 py-2 border-b border-slate-800/60 bg-slate-950/50">
@@ -209,7 +217,8 @@ export function LayerPanel({ isOpen, onClose }: LayerPanelProps) {
           </div>
         </div>
       </div>
-    </aside>
+      </aside>
+    </>
   );
 }
 
@@ -226,7 +235,7 @@ function LayerItem({ id, name, latinName, color, isVisible, onToggle }: LayerIte
   return (
     <div
       onClick={onToggle}
-      className={`group flex items-center justify-between px-2.5 py-2 rounded-xl cursor-pointer border transition-all focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none ${
+      className={`group flex items-center justify-between px-3 py-2.5 min-h-[44px] rounded-xl cursor-pointer border transition-all focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none select-none ${
         isVisible
           ? 'bg-slate-900/80 border-slate-800 text-slate-200 hover:border-slate-700'
           : 'bg-slate-950/60 border-slate-900/60 text-slate-500 hover:border-slate-800'

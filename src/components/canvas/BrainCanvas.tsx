@@ -16,7 +16,7 @@ export function BrainCanvas() {
   return (
     <CanvasErrorBoundary>
       <div
-        className="w-full h-full relative z-0 cursor-grab active:cursor-grabbing select-none"
+        className="w-full h-full relative z-0 cursor-grab active:cursor-grabbing select-none touch-none"
         role="region"
         aria-label="Lienzo de interacción 3D del cerebro humano"
       >

@@ -201,7 +201,7 @@ function HotspotPin({
               transition: 'transform 0.15s ease-out',
               willChange: 'opacity, transform',
             }}
-            className="relative flex items-center justify-center cursor-pointer group select-none"
+            className="relative flex items-center justify-center cursor-pointer group select-none min-w-[36px] min-h-[36px]"
             onClick={(e) => {
               e.stopPropagation();
               onSelect(isSelected ? null : hotspot.id);

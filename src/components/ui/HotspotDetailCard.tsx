@@ -15,7 +15,8 @@ import {
   Volume2,
   Copy,
   Check,
-  Share2,
+  ChevronUp,
+  ChevronDown,
 } from 'lucide-react';
 
 export function HotspotDetailCard() {
@@ -26,6 +27,7 @@ export function HotspotDetailCard() {
 
   const [copied, setCopied] = useState(false);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const [isMobileExpanded, setIsMobileExpanded] = useState(false);
 
   if (!selectedHotspotId) return null;
 
@@ -82,13 +84,24 @@ ${hotspot.surgicalNotes}
 
   return (
     <aside
-      className="fixed right-3 top-16 bottom-20 z-40 w-96 max-w-[calc(100vw-1.5rem)] flex flex-col rounded-2xl border border-slate-800/80 bg-slate-950/98 backdrop-blur-2xl glass-panel shadow-2xl overflow-hidden pointer-events-auto transition-all animate-in fade-in slide-in-from-right duration-200"
+      className={`fixed inset-x-2 bottom-2 md:inset-x-auto md:right-3 md:top-16 md:bottom-20 z-40 md:w-96 md:max-w-[calc(100vw-1.5rem)] flex flex-col rounded-2xl border border-slate-800/80 bg-slate-950/98 backdrop-blur-2xl glass-panel shadow-2xl overflow-hidden pointer-events-auto transition-all animate-in slide-in-from-bottom md:slide-in-from-right duration-200 ${
+        isMobileExpanded ? 'max-h-[82dvh]' : 'max-h-[38dvh] md:max-h-none'
+      }`}
       role="dialog"
       aria-label={`Ficha clínica: ${hotspot.title}`}
     >
+      {/* Mobile drag handle */}
+      <button
+        onClick={() => setIsMobileExpanded(!isMobileExpanded)}
+        className="w-full py-1.5 flex justify-center items-center md:hidden bg-slate-900/60 border-b border-slate-800/40"
+        aria-label={isMobileExpanded ? 'Contraer ficha médica' : 'Expandir ficha médica completa'}
+      >
+        <div className="w-10 h-1 bg-slate-600 rounded-full" />
+      </button>
+
       {/* Header with Title, Badges and Controls */}
-      <div className="p-4 border-b border-slate-800/80 bg-slate-900/50">
-        <div className="flex items-start justify-between gap-3 mb-2">
+      <div className="p-3.5 sm:p-4 border-b border-slate-800/80 bg-slate-900/50">
+        <div className="flex items-start justify-between gap-2 sm:gap-3 mb-1.5 sm:mb-2">
           <div className="flex items-center gap-1.5 flex-wrap">
             <span
               className="px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase border"
@@ -107,13 +120,13 @@ ${hotspot.surgicalNotes}
               </span>
             )}
 
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-950/60 border border-cyan-500/30 text-cyan-300 font-mono font-medium flex items-center gap-1">
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-950/60 border border-cyan-500/30 text-cyan-300 font-mono font-medium hidden sm:flex items-center gap-1">
               <Sparkles className="w-2.5 h-2.5 text-cyan-400" />
               ENFOCADO
             </span>
           </div>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 shrink-0">
             {/* Audio pronunciation */}
             <button
               onClick={handlePronounce}
@@ -138,9 +151,19 @@ ${hotspot.surgicalNotes}
               {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
             </button>
 
+            {/* Mobile Expand / Collapse Toggle */}
+            <button
+              onClick={() => setIsMobileExpanded(!isMobileExpanded)}
+              className="p-1.5 text-slate-400 hover:text-cyan-400 hover:bg-slate-800/60 rounded-lg transition md:hidden"
+              aria-label={isMobileExpanded ? 'Contraer ficha' : 'Expandir ficha'}
+              title={isMobileExpanded ? 'Contraer ficha' : 'Expandir ficha'}
+            >
+              {isMobileExpanded ? <ChevronDown className="w-4 h-4 text-cyan-400" /> : <ChevronUp className="w-4 h-4 text-cyan-400" />}
+            </button>
+
             <button
               onClick={handleRefocus}
-              className="p-1.5 text-slate-400 hover:text-cyan-400 hover:bg-slate-800/60 rounded-lg transition"
+              className="p-1.5 text-slate-400 hover:text-cyan-400 hover:bg-slate-800/60 rounded-lg transition hidden sm:inline-flex"
               aria-label="Centrar y reenfocar cámara"
               title="Centrar y reenfocar cámara"
             >
@@ -158,15 +181,15 @@ ${hotspot.surgicalNotes}
           </div>
         </div>
 
-        <h3 className="text-base font-bold text-slate-100 leading-snug">
+        <h3 className="text-sm sm:text-base font-bold text-slate-100 leading-snug">
           {hotspot.title}
         </h3>
-        <p className="text-xs text-slate-400 font-mono italic mt-0.5">
+        <p className="text-[11px] sm:text-xs text-slate-400 font-mono italic mt-0.5">
           {hotspot.latinTitle}
         </p>
 
         {/* Focus Mode Controls */}
-        <div className="mt-3 pt-2.5 border-t border-slate-800/60 flex items-center justify-between text-xs text-slate-400">
+        <div className="mt-2.5 pt-2 border-t border-slate-800/60 flex items-center justify-between text-xs text-slate-400">
           <span className="flex items-center gap-1.5 text-[11px] font-medium">
             <Layers className="w-3.5 h-3.5 text-slate-400" />
             Fondo:
@@ -201,7 +224,7 @@ ${hotspot.surgicalNotes}
       </div>
 
       {/* Medical Content Scrollable */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 text-xs">
+      <div className="flex-1 overflow-y-auto p-3.5 sm:p-4 space-y-3 sm:space-y-4 text-xs">
         {/* Anatomical Summary */}
         <div className="p-3 rounded-xl bg-slate-950/40 border border-slate-800/60 text-slate-300 leading-relaxed">
           {hotspot.summary}

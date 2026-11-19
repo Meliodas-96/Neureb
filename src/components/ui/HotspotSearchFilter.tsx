@@ -92,20 +92,20 @@ export function HotspotSearchFilter() {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center pt-14 sm:pt-20 px-3 sm:px-4 bg-slate-950/75 backdrop-blur-md animate-in fade-in duration-150 pointer-events-auto"
+      className="fixed inset-0 z-50 flex items-start justify-center pt-4 sm:pt-20 px-2 sm:px-4 bg-slate-950/75 backdrop-blur-md animate-in fade-in duration-150 pointer-events-auto"
       onClick={() => setIsSearchOpen(false)}
       role="dialog"
       aria-modal="true"
       aria-label="Explorador y buscador neuroanatómico"
     >
       <div
-        className="w-full max-w-2xl bg-slate-950/95 border border-slate-700/80 rounded-2xl shadow-2xl glass-panel overflow-hidden flex flex-col animate-in zoom-in-95 duration-150"
+        className="w-full max-w-2xl max-h-[85dvh] bg-slate-950/95 border border-slate-700/80 rounded-2xl shadow-2xl glass-panel overflow-hidden flex flex-col animate-in zoom-in-95 duration-150"
         onClick={(e) => e.stopPropagation()}
         onKeyDown={handleKeyDown}
       >
         {/* Search Input Bar */}
-        <div className="relative flex items-center px-4 py-3 border-b border-slate-800/80 bg-slate-900/40">
-          <Search className="w-5 h-5 text-cyan-400 absolute left-4 pointer-events-none" />
+        <div className="relative flex items-center px-3 sm:px-4 py-2.5 sm:py-3 border-b border-slate-800/80 bg-slate-900/40">
+          <Search className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400 absolute left-3 sm:left-4 pointer-events-none" />
           <input
             ref={inputRef}
             type="text"
@@ -115,10 +115,10 @@ export function HotspotSearchFilter() {
               setSelectedIndex(0);
             }}
             placeholder="Buscar estructura, par craneal, lóbulo, área de Broca, ictus..."
-            className="w-full pl-8 pr-28 py-1 bg-transparent text-sm text-slate-100 placeholder-slate-400 focus:outline-none"
+            className="w-full pl-7 sm:pl-8 pr-20 sm:pr-28 py-1 bg-transparent text-sm text-slate-100 placeholder-slate-400 focus:outline-none"
           />
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             {searchQuery && (
               <button
                 onClick={() => {
@@ -133,17 +133,18 @@ export function HotspotSearchFilter() {
               </button>
             )}
 
-            <span className="text-[11px] px-2 py-0.5 rounded-full bg-cyan-950/70 border border-cyan-500/30 text-cyan-300 font-mono font-medium">
-              {filteredHotspots.length} {filteredHotspots.length === 1 ? 'resultado' : 'resultados'}
+            <span className="text-[10px] sm:text-[11px] px-2 py-0.5 rounded-full bg-cyan-950/70 border border-cyan-500/30 text-cyan-300 font-mono font-medium">
+              {filteredHotspots.length}
             </span>
 
             <button
               onClick={() => setIsSearchOpen(false)}
-              className="p-1 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/80 transition"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/80 transition"
               title="Cerrar (Esc)"
               aria-label="Cerrar buscador"
             >
-              <kbd className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-[10px] font-mono text-slate-400">
+              <X className="w-4 h-4 sm:hidden text-slate-400" />
+              <kbd className="hidden sm:inline px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-[10px] font-mono text-slate-400">
                 ESC
               </kbd>
             </button>
@@ -274,7 +275,7 @@ export function HotspotSearchFilter() {
 
         {/* Modal Command Footer */}
         <div className="px-4 py-2 bg-slate-900/80 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400 font-mono">
-          <div className="flex items-center gap-3">
+          <div className="hidden sm:flex items-center gap-3">
             <span className="flex items-center gap-1">
               <kbd className="px-1.5 py-0.2 rounded bg-slate-800 border border-slate-700 text-slate-300 text-[10px]">
                 ↑↓
@@ -289,12 +290,22 @@ export function HotspotSearchFilter() {
             </span>
           </div>
 
+          <div className="sm:hidden text-cyan-400/90 text-[11px]">
+            Toca una estructura para enfocarla
+          </div>
+
           <div className="flex items-center gap-2">
-            <span>Clic fuera o</span>
-            <kbd className="px-1.5 py-0.2 rounded bg-slate-800 border border-slate-700 text-slate-300 text-[10px]">
+            <span className="hidden sm:inline">Clic fuera o</span>
+            <kbd className="hidden sm:inline px-1.5 py-0.2 rounded bg-slate-800 border border-slate-700 text-slate-300 text-[10px]">
               ESC
             </kbd>
-            <span>para cerrar</span>
+            <span className="hidden sm:inline">para cerrar</span>
+            <button
+              onClick={() => setIsSearchOpen(false)}
+              className="sm:hidden text-xs text-slate-400 hover:text-white px-2 py-0.5 rounded bg-slate-800"
+            >
+              Cerrar
+            </button>
           </div>
         </div>
       </div>

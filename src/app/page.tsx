@@ -16,7 +16,7 @@ import { UrlStateSync } from '@/components/ui/UrlStateSync';
 import { useBrainStore } from '@/store/useBrainStore';
 
 export default function Home() {
-  const [isLayerPanelOpen, setIsLayerPanelOpen] = useState(true);
+  const [isLayerPanelOpen, setIsLayerPanelOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const selectHotspot = useBrainStore((state) => state.selectHotspot);
   const selectedHotspotId = useBrainStore((state) => state.selectedHotspotId);
@@ -24,6 +24,13 @@ export default function Home() {
   const setIsQuizOpen = useBrainStore((state) => state.setIsQuizOpen);
   const isSearchOpen = useBrainStore((state) => state.isSearchOpen);
   const setIsSearchOpen = useBrainStore((state) => state.setIsSearchOpen);
+
+  // Open layer panel by default on desktop screens, but keep closed on mobile so 3D model is visible
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.innerWidth >= 1024) {
+      setIsLayerPanelOpen(true);
+    }
+  }, []);
 
   // Global Keyboard shortcuts:
   // - Cmd+K / Ctrl+K / '/': opens neuroanatomy search modal
@@ -65,7 +72,7 @@ export default function Home() {
   }, [selectHotspot, selectedHotspotId, isHelpOpen, isQuizOpen, setIsQuizOpen, isSearchOpen, setIsSearchOpen]);
 
   return (
-    <main className="relative w-screen h-screen overflow-hidden bg-clinical-bg">
+    <main className="relative w-screen h-[100dvh] overflow-hidden bg-clinical-bg select-none">
       {/* URL Query Params Synchronizer (?hotspot=...&preset=...&xray=...) */}
       <UrlStateSync />
 

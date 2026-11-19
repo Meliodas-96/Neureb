@@ -17,6 +17,8 @@ interface BrainState {
   isXRayMode: boolean;
   setCerebrumOpacity: (opacity: number) => void;
   toggleXRayMode: () => void;
+  isOpacityPanelOpen: boolean;
+  setIsOpacityPanelOpen: (open: boolean) => void;
 
   // Hotspots and Focus Mode
   selectedHotspotId: string | null;
@@ -118,6 +120,8 @@ export const useBrainStore = create<BrainState>((set, get) => ({
 
   cerebrumOpacity: 1.0,
   isXRayMode: false,
+  isOpacityPanelOpen: false,
+  setIsOpacityPanelOpen: (open) => set({ isOpacityPanelOpen: open }),
 
   setCerebrumOpacity: (opacity) =>
     set({
@@ -204,6 +208,7 @@ export const useBrainStore = create<BrainState>((set, get) => ({
       clippingAxis: 'none',
       clippingOffset: 0,
       isClippingPanelOpen: false,
+      isOpacityPanelOpen: false,
       isQuizOpen: false,
     }),
 }));
