@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import './globals.css';
 
 export const viewport: Viewport = {
@@ -77,6 +78,7 @@ export default function RootLayout({
     <html lang="es" className="dark">
       <body className="bg-clinical-bg text-slate-100 antialiased h-screen w-screen overflow-hidden">
         {children}
+        <SpeedInsights />
       </body>
     </html>
   );
